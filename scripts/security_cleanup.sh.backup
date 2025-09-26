@@ -1,0 +1,207 @@
+#!/bin/bash
+# Security cleanup script for CHATTA 1.0 public release
+# This script removes personal information and sensitive data
+
+echo "🔒 CHATTA Security Cleanup for Public Release"
+echo "=============================================="
+echo ""
+echo "This script will:"
+echo "1. Remove personal file paths"
+echo "2. Delete audit reports with system info"
+echo "3. Fix hardcoded paths in test files"
+echo "4. Create sanitized example files"
+echo ""
+read -p "Continue with security cleanup? (y/n): " -n 1 -r
+echo ""
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cleanup cancelled."
+    exit 1
+fi
+
+# Backup before changes
+echo ""
+echo "📦 Creating backup..."
+tar -czf "security_backup_$(date +%Y%m%d_%H%M%S).tar.gz" \
+    --exclude=".venv" \
+    --exclude="__pycache__" \
+    --exclude=".git" \
+    . 2>/dev/null
+echo "✅ Backup created"
+
+# Counter for changes
+changes_made=0
+
+# 1. Fix absolute paths with username in specific files
+echo ""
+echo "🔧 Fixing absolute paths with personal information..."
+
+# Fix chatta_mcp_server.sh
+if [ -f "chatta_mcp_server.sh" ]; then
+    sed -i.security 's|/Users/az/Claude/bumba-claude/CHATTA 1.0|.|g' chatta_mcp_server.sh
+    if [ -f "chatta_mcp_server.sh.security" ]; then
+        rm "chatta_mcp_server.sh.security"
+        echo "   ✅ Fixed chatta_mcp_server.sh"
+        ((changes_made++))
+    fi
+fi
+
+# Fix test files
+for test_file in \
+    "tests/integration/test_mcp_server_complete.py" \
+    "tests/integration/test_mcp_tools.py" \
+    "tests/integration/test_mcp_integration.py" \
+    "scripts/setup/verify_mcp_config.py"
+do
+    if [ -f "$test_file" ]; then
+        # Replace absolute paths with dynamic resolution
+        sed -i.security 's|"/Users/az/Claude/bumba-claude/CHATTA 1.0/|os.path.dirname(os.path.abspath(__file__)) + "/|g' "$test_file"
+        if [ -f "${test_file}.security" ]; then
+            rm "${test_file}.security"
+            echo "   ✅ Fixed $test_file"
+            ((changes_made++))
+        fi
+    fi
+done
+
+# Fix SPRINT_LOG.md
+if [ -f "docs/sprints/SPRINT_LOG.md" ]; then
+    sed -i.security 's|/Users/az/[^"]*|~/project|g' "docs/sprints/SPRINT_LOG.md"
+    if [ -f "docs/sprints/SPRINT_LOG.md.security" ]; then
+        rm "docs/sprints/SPRINT_LOG.md.security"
+        echo "   ✅ Anonymized paths in SPRINT_LOG.md"
+        ((changes_made++))
+    fi
+fi
+
+# 2. Remove audit reports with system information
+echo ""
+echo "🗑️  Removing audit reports with system information..."
+audit_count=0
+for audit_file in config/audit_report_*.json; do
+    if [ -f "$audit_file" ]; then
+        rm "$audit_file"
+        echo "   ✅ Removed $(basename $audit_file)"
+        ((audit_count++))
+        ((changes_made++))
+    fi
+done
+if [ $audit_count -eq 0 ]; then
+    echo "   ℹ️  No audit reports found"
+fi
+
+# 3. Create .env.example files
+echo ""
+echo "📝 Creating example environment files..."
+env_created=0
+
+# Create main .env.example if .env exists
+if [ -f ".env" ]; then
+    # Strip values, keep only keys
+    sed 's/=.*/=/' .env > .env.example
+    echo "   ✅ Created .env.example"
+    ((env_created++))
+    ((changes_made++))
+fi
+
+# Create comprehensive .env.example if none exists
+if [ ! -f ".env.example" ]; then
+    cat > .env.example << 'EOF'
+# CHATTA Environment Variables
+
+# Optional: OpenAI API Configuration
+OPENAI_API_KEY=
+
+# Optional: LiveKit Configuration
+LIVEKIT_URL=ws://localhost:7880
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
+LIVEKIT_ACCESS_PASSWORD=
+
+# Service Ports (defaults shown)
+KOKORO_PORT=7888
+WHISPER_PORT=8880
+LIVEKIT_PORT=2022
+
+# Performance Settings
+CHATTA_CONNECTION_POOL_SIZE=10
+CHATTA_REQUEST_TIMEOUT=5
+CHATTA_CACHE_ENABLED=true
+CHATTA_PARALLEL_REQUESTS=true
+CHATTA_HEALTH_CHECK_INTERVAL=30
+
+# Audio Settings
+CHATTA_AUDIO_FEEDBACK=true
+CHATTA_DISABLE_SILENCE_DETECTION=false
+CHATTA_VAD_AGGRESSIVENESS=1
+CHATTA_SILENCE_THRESHOLD_MS=1200
+CHATTA_MIN_RECORDING_DURATION=0.3
+CHATTA_INITIAL_SILENCE_GRACE_PERIOD=2.0
+EOF
+    echo "   ✅ Created comprehensive .env.example"
+    ((env_created++))
+    ((changes_made++))
+fi
+
+# 4. Remove any backup files
+echo ""
+echo "🧹 Cleaning up backup files..."
+backup_count=$(find . -name "*.bak" -o -name "*.security" 2>/dev/null | wc -l)
+find . -name "*.bak" -o -name "*.security" -delete 2>/dev/null
+if [ $backup_count -gt 0 ]; then
+    echo "   ✅ Removed $backup_count backup files"
+    ((changes_made++))
+fi
+
+# 5. Final verification
+echo ""
+echo "🔍 Running verification checks..."
+echo ""
+
+# Check for remaining personal paths
+remaining_paths=$(grep -r "/Users/az" --include="*.py" --include="*.sh" --include="*.md" --include="*.json" \
+    --exclude-dir=".venv" --exclude-dir=".git" --exclude="security_backup_*" . 2>/dev/null | wc -l)
+
+if [ $remaining_paths -eq 0 ]; then
+    echo "   ✅ No personal paths found"
+else
+    echo "   ⚠️  Warning: $remaining_paths files still contain personal paths"
+    echo "      Run: grep -r '/Users/az' --exclude-dir='.venv' --exclude-dir='.git' ."
+fi
+
+# Check for API keys
+api_keys=$(grep -r "sk-[a-zA-Z0-9]" --include="*.py" --include="*.sh" --include="*.json" \
+    --exclude-dir=".venv" --exclude-dir=".git" . 2>/dev/null | wc -l)
+
+if [ $api_keys -eq 0 ]; then
+    echo "   ✅ No hardcoded API keys found"
+else
+    echo "   ⚠️  Warning: Potential API keys found in $api_keys locations"
+fi
+
+# Summary
+echo ""
+echo "=============================================="
+echo "📊 Security Cleanup Summary"
+echo "=============================================="
+echo "   Total changes made: $changes_made"
+echo ""
+echo "✅ COMPLETED:"
+echo "   • Fixed absolute paths in files"
+echo "   • Removed audit reports"
+echo "   • Created .env.example files"
+echo "   • Cleaned backup files"
+echo ""
+
+if [ $remaining_paths -eq 0 ] && [ $api_keys -eq 0 ]; then
+    echo "🎉 SUCCESS! System is ready for public release."
+    echo "   No personal information detected."
+else
+    echo "⚠️  ATTENTION NEEDED:"
+    echo "   Some potential sensitive information remains."
+    echo "   Please review manually before public release."
+fi
+
+echo ""
+echo "📦 Backup saved as: security_backup_*.tar.gz"
+echo "=============================================="

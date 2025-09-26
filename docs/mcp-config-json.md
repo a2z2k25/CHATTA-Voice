@@ -33,7 +33,7 @@ This document explains how environment variables work in MCP (Model Context Prot
     "my-server": {
       "command": "./my-server", 
       "env": {
-        "API_KEY": "sk-actual-literal-key-here",  // Only literal values
+        "API_KEY": "sk-your-actual-key-here",  // Only literal values
         "DEBUG": "true",                          // Literal strings
         "PORT": "3000"                            // Literal values only
       }
@@ -88,7 +88,7 @@ Let the MCP server read from the global environment:
       "command": "uvx",
       "args": ["voice-mode"],
       "env": {
-        "OPENAI_API_KEY": "sk-proj-actual-key-here",
+        "OPENAI_API_KEY": "sk-proj-your-key-here",
         "VOICE_MODE_DEBUG": "true",
         "STT_BASE_URL": "https://api.openai.com/v1",
         "TTS_BASE_URL": "https://api.openai.com/v1"

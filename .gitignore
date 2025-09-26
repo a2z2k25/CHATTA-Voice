@@ -117,3 +117,11 @@ models/
 *.mlpackage/
 *.mlmodel
 *.mlmodelc/
+
+# Docker configuration (contains local paths)
+docker.config.json
+docker.config.local.json
+
+# Docker volumes and data
+docker/volumes/
+docker/data/

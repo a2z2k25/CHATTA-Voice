@@ -1,0 +1,7 @@
+{
+  "prefetch_voices": true,
+  "warm_connections": true,
+  "predictive_loading": true,
+  "parallel_processing": true,
+  "stream_buffer_ms": 100
+}

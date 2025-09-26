@@ -14,10 +14,22 @@ Building Unified Multi-agent Business Applications
 Professional • Intelligent • Secure • Enterprise-Ready
 ```
 
+<<<<<<< Updated upstream
 ## 🏁 What is CHATTA?
 
 **CHATTA** (Conversational Hybrid Assistant for Text-To-Audio) enables natural voice conversations with Claude Code and other AI assistants through the Model Context Protocol (MCP). Speak naturally, get responses in voice - it's that simple. Part of the **BUMBA Platform** suite of enterprise-ready development tools.
 
+=======
+[![Version](https://img.shields.io/badge/version-3.34.3-gold.svg)](https://github.com/mbailey/chatta)
+[![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![BUMBA Platform](https://img.shields.io/badge/BUMBA-Platform-red.svg)](https://bumba.ai)
+
+## 🏁 What is CHATTA?
+
+**CHATTA** (Conversational Hybrid Assistant for Text-To-Audio) enables natural voice conversations with Claude Code and other AI assistants through the Model Context Protocol (MCP). Speak naturally, get responses in voice - it's that simple. Part of the **BUMBA Platform** suite of enterprise-ready development tools.
+
+>>>>>>> Stashed changes
 ## 🟢 Quick Start
 
 ```bash

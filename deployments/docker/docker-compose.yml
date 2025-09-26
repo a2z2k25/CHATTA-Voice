@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  whisper:
+    build:
+      context: ./docker/whisper
+      dockerfile: Dockerfile.simple
+    container_name: chatta-whisper
+    ports:
+    - 8880:8880
+    volumes:
+    - ./models/whisper:/models
+    environment:
+    - WHISPER_MODEL=base
+    - WHISPER_THREADS=4
+    restart: unless-stopped
+    networks:
+    - chatta-network
+  kokoro:
+    build:
+      context: ./docker/kokoro
+      dockerfile: Dockerfile
+    container_name: chatta-kokoro
+    ports:
+    - 7888:7888
+    volumes:
+    - ./models/kokoro:/models
+    environment:
+    - KOKORO_MODEL=kokoro-v0.87
+    - KOKORO_VOICE=af
+    restart: unless-stopped
+    networks:
+    - chatta-network
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: chatta-livekit
+    ports:
+    - 7880:7880
+    - 7881:7881
+    - 50000-50100:50000-50100/udp
+    volumes:
+    - ./docker/livekit/livekit.yaml:/etc/livekit.yaml
+    restart: unless-stopped
+    networks:
+    - chatta-network
+    command: --config /etc/livekit.yaml
+networks:
+  chatta-network:
+    driver: bridge
+    name: chatta-network
+volumes:
+  whisper-models: {}
+  kokoro-models: {}

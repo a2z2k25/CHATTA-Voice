@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    openai-whisper \
+    flask \
+    flask-cors
+
+# Create app directory
+WORKDIR /app
+
+# Copy server code
+COPY server_simple.py /app/server.py
+
+EXPOSE 8880
+
+CMD ["python", "/app/server.py"]

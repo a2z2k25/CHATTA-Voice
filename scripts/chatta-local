@@ -1,0 +1,8 @@
+#!/bin/bash
+# CHATTA with local Docker services
+export STT_BASE_URL="http://localhost:8880/v1"
+export TTS_BASE_URL="http://localhost:7888/v1"
+export PREFER_LOCAL="true"
+export OPENAI_API_KEY="dummy-key-for-local"
+
+exec chatta "$@"

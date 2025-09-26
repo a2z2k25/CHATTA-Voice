@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "chatta": {
+      "command": "chatta",
+      "args": ["mcp"],
+      "env": {
+        "CHATTA_MODE": "local"
+      }
+    }
+  }
+}

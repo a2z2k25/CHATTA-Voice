@@ -1,0 +1,7 @@
+{
+  "buffer_size": 8192,
+  "chunk_size": 4096,
+  "max_cache_entries": 50,
+  "gc_threshold": 100,
+  "connection_pool_size": 5
+}

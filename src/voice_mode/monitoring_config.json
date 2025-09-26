@@ -1,0 +1,30 @@
+{
+  "prometheus": {
+    "enabled": true,
+    "port": 9090,
+    "metrics": [
+      "latency_histogram",
+      "request_counter",
+      "error_rate",
+      "memory_usage",
+      "cpu_usage",
+      "cache_hit_rate"
+    ]
+  },
+  "health_check": {
+    "enabled": true,
+    "interval": 30,
+    "timeout": 5,
+    "endpoints": [
+      "/health",
+      "/ready",
+      "/metrics"
+    ]
+  },
+  "logging": {
+    "level": "INFO",
+    "rotation": "daily",
+    "max_files": 7,
+    "format": "json"
+  }
+}

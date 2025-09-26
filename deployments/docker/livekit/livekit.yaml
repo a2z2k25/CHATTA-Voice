@@ -1,0 +1,27 @@
+# LiveKit configuration for CHATTA
+port: 7880
+bind_addresses:
+  - "0.0.0.0"
+
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50100
+  use_external_ip: false
+
+keys:
+  # Development keys - replace in production
+  APIwJ4XQiVAkmh5v: lZkoh4BNlxBo0OkUrfKBvhwPyxEHgEBctlIHgNHjNH5
+
+room:
+  auto_create: true
+  empty_timeout: 300
+  max_participants: 10
+
+webhook:
+  # Optional webhook configuration
+  # url: http://localhost:3000/webhook
+
+logging:
+  level: info
+  sample: false

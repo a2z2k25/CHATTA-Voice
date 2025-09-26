@@ -1,0 +1,58 @@
+{
+  "_comment": "Copy this file to docker.config.json and customize paths as needed",
+  "docker": {
+    "base_path": "./docker",
+    "compose_file": "docker-compose.yml",
+    "network_name": "chatta-network",
+    "services": {
+      "whisper": {
+        "container_name": "chatta-whisper",
+        "build_context": "./docker/whisper",
+        "dockerfile": "Dockerfile",
+        "port": "8880:8880",
+        "model_path": "./models/whisper",
+        "environment": {
+          "WHISPER_MODEL": "base",
+          "WHISPER_THREADS": "4"
+        }
+      },
+      "kokoro": {
+        "container_name": "chatta-kokoro",
+        "build_context": "./docker/kokoro",
+        "dockerfile": "Dockerfile",
+        "port": "7888:7888",
+        "model_path": "./models/kokoro",
+        "environment": {
+          "KOKORO_MODEL": "kokoro-v0.87",
+          "KOKORO_VOICE": "af"
+        }
+      },
+      "livekit": {
+        "container_name": "chatta-livekit",
+        "image": "livekit/livekit-server:latest",
+        "ports": {
+          "api": "7880:7880",
+          "webrtc_tcp": "7881:7881",
+          "webrtc_udp": "50000-50100:50000-50100/udp"
+        },
+        "config_path": "./docker/livekit/livekit.yaml"
+      }
+    }
+  },
+  "models": {
+    "base_path": "./models",
+    "whisper": {
+      "path": "./models/whisper",
+      "default_model": "base"
+    },
+    "kokoro": {
+      "path": "./models/kokoro",
+      "default_model": "kokoro-v0.87"
+    }
+  },
+  "local_paths": {
+    "project_root": ".",
+    "docker_root": "./docker",
+    "models_root": "./models"
+  }
+}

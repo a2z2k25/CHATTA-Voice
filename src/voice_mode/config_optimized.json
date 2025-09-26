@@ -1,0 +1,22 @@
+{
+  "connection_pooling": {
+    "max_connections": 10,
+    "keepalive": true,
+    "timeout": 30
+  },
+  "retry_strategy": {
+    "max_retries": 3,
+    "backoff_factor": 1.5,
+    "max_backoff": 10
+  },
+  "cache_settings": {
+    "voice_cache": true,
+    "cache_ttl": 3600,
+    "max_cache_size": 100
+  },
+  "performance": {
+    "parallel_requests": true,
+    "request_timeout": 5,
+    "connection_timeout": 2
+  }
+}

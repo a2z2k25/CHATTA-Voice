@@ -1,0 +1,6 @@
+# CHATTA Voice Preferences
+# Format: voice_name or provider:voice_name
+# Examples:
+nova        # OpenAI voice
+kokoro:af   # Kokoro voice
+en-US       # Language preference

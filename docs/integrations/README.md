@@ -1,23 +1,35 @@
-# Voice Mode Integration Guides
+# CHATTA Integration Guides
 
-This directory contains beginner-friendly, step-by-step integration guides for setting up Voice Mode with various AI coding assistants and development tools. Each guide assumes no prior experience with the tool and walks you through from installation to your first voice conversation.
+```
+ ██████╗██╗  ██╗ █████╗ ████████╗████████╗ █████╗
+██╔════╝██║  ██║██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗
+██║     ███████║███████║   ██║      ██║   ███████║
+██║     ██╔══██║██╔══██║   ██║      ██║   ██╔══██║
+╚██████╗██║  ██║██║  ██║   ██║      ██║   ██║  ██║
+ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝
+
+Natural Voice Conversations for AI Assistants
+Part of BUMBA - Building Unified Multi-agent Business Applications
+```
+
+This directory contains beginner-friendly, step-by-step integration guides for setting up CHATTA with various AI coding assistants and development tools. Each guide assumes no prior experience with the tool and walks you through from installation to your first voice conversation.
 
 ## Available Integrations
 
 ### AI Coding Assistants
 
-- 🤖 **[Claude Code](claude-code/README.md)** - Anthropic's official CLI for Claude
-- 🖥️ **[Claude Desktop](claude-desktop/README.md)** - Claude's desktop application
-- 🌟 **[Gemini CLI](gemini-cli/README.md)** - Google's Gemini command-line interface
-- 🦘 **[Roo Code](roo-code/README.md)** - Roo Coder assistant
-- ⚡ **[Cursor](cursor/README.md)** - The AI-first code editor
-- 💻 **[VS Code](vscode/README.md)** - Visual Studio Code with MCP support
-- 🔧 **[Cline](cline/README.md)** - Autonomous coding agent for VS Code
-- ⚡ **[Zed](zed/README.md)** - High-performance, multiplayer code editor
-- 🏄 **[Windsurf](windsurf/README.md)** - The IDE that writes code for you
-- 🔄 **[Continue](continue/README.md)** - Open-source AI code assistant
+- 🟢 **[Claude Code](claude-code/README.md)** - Anthropic's official CLI for Claude
+- 🟢 **[Claude Desktop](claude-desktop/README.md)** - Claude's desktop application
+- 🟡 **[Gemini CLI](gemini-cli/README.md)** - Google's Gemini command-line interface
+- 🟢 **[Roo Code](roo-code/README.md)** - Roo Coder assistant
+- 🔴 **[Cursor](cursor/README.md)** - The AI-first code editor
+- 🟢 **[VS Code](vscode/README.md)** - Visual Studio Code with MCP support
+- 🟠 **[Cline](cline/README.md)** - Autonomous coding agent for VS Code
+- 🟢 **[Zed](zed/README.md)** - High-performance, multiplayer code editor
+- 🔴 **[Windsurf](windsurf/README.md)** - The IDE that writes code for you
+- 🟠 **[Continue](continue/README.md)** - Open-source AI code assistant
 
-## 🤝 Community Help Needed
+## 🟡 Community Help Needed
 
 > **Note**: These integration guides were created based on documentation and API specifications. We haven't yet tested installing and configuring each desktop application firsthand. If you're familiar with any of these tools, we'd greatly appreciate your review and feedback!
 > 
@@ -57,18 +69,18 @@ To add a new integration guide:
 
 ## Integration Features
 
-Voice Mode adds these capabilities to your development tools:
+CHATTA adds these capabilities to your development tools:
 
-- 🎙️ **Natural voice conversations** - Speak your questions and hear responses
-- 🚀 **Real-time interaction** - Code changes happen as you talk
-- 🔒 **Privacy options** - Use local STT/TTS services for offline operation
-- 🌐 **Room-based collaboration** - Share voice sessions via LiveKit
-- 📊 **Performance metrics** - Track conversation statistics
+- 🟢 **Natural voice conversations** - Speak your questions and hear responses
+- 🟡 **Real-time interaction** - Code changes happen as you talk
+- 🟢 **Privacy options** - Use local STT/TTS services for offline operation
+- 🔴 **Room-based collaboration** - Share voice sessions via LiveKit
+- 🟠 **Performance metrics** - Track conversation statistics
 
 ## Need Help?
 
-- 📚 Check the [main documentation](../../README.md)
-- 🔧 Review [configuration options](../configuration.md)
-- 💬 Join our [Discord community](https://discord.gg/Hm7dF3uCfG)
-- 🐛 See [troubleshooting guides](../troubleshooting/README.md)
-- 🔨 [Report issues or contribute improvements](https://github.com/mbailey/voicemode/issues)
+- 🟢 Check the [main documentation](../../README.md)
+- 🟠 Review [configuration options](../configuration.md)
+- 🟡 Join our community support
+- 🔴 See [troubleshooting guides](../troubleshooting/README.md)
+- 🟠 [Report issues or contribute improvements](https://github.com/mbailey/voicemode/issues)
