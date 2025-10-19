@@ -125,3 +125,6 @@ docker.config.local.json
 # Docker volumes and data
 docker/volumes/
 docker/data/
+
+# LiveKit configuration (contains API keys)
+deployments/docker/livekit/livekit.yaml

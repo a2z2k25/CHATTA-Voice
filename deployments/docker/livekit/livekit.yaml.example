@@ -1,6 +1,5 @@
 # LiveKit configuration for CHATTA
-# WARNING: This file contains sensitive credentials
-# Copy from livekit.yaml.example and add your own keys
+# Copy this file to livekit.yaml and replace placeholders with your actual values
 
 port: 7880
 bind_addresses:

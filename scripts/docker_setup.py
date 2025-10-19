@@ -277,6 +277,9 @@ async def health_check():
 def create_livekit_config(config: Dict[str, Any]) -> None:
     """Create LiveKit configuration file."""
     livekit_config = """# LiveKit configuration for CHATTA
+# WARNING: Replace placeholder keys with your own API credentials
+# Generate keys using: openssl rand -base64 32
+
 port: 7880
 bind_addresses:
   - "0.0.0.0"
@@ -288,8 +291,9 @@ rtc:
   use_external_ip: false
 
 keys:
-  # Development keys - replace in production
-  APIwJ4XQiVAkmh5v: lZkoh4BNlxBo0OkUrfKBvhwPyxEHgEBctlIHgNHjNH5
+  # Generate your own API key and secret
+  # You can use: openssl rand -base64 32
+  YOUR_API_KEY: YOUR_API_SECRET
 
 room:
   auto_create: true
@@ -304,10 +308,10 @@ logging:
   level: info
   sample: false
 """
-    
+
     config_path = Path(config['docker']['base_path']) / 'livekit' / 'livekit.yaml'
     config_path.write_text(livekit_config)
-    print(f"✓ Created LiveKit configuration")
+    print(f"✓ Created LiveKit configuration (remember to add your API keys!)")
 
 def main():
     """Main setup function."""
