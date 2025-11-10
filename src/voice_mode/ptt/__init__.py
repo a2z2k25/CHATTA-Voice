@@ -30,6 +30,7 @@ from .state_machine import (
     StateTransition,
     create_ptt_state_machine
 )
+from .controller import PTTController, create_ptt_controller
 
 # Public API
 __all__ = [
@@ -48,4 +49,8 @@ __all__ = [
     "PTTStateMachine",
     "StateTransition",
     "create_ptt_state_machine",
+
+    # Controller
+    "PTTController",
+    "create_ptt_controller",
 ]
