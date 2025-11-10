@@ -393,6 +393,10 @@ class PTTController:
         if not self.is_recording:
             return
 
+        # Reset toggle mode flag if active
+        if self._toggle_active:
+            self._toggle_active = False
+
         self._state_machine.transition(
             PTTState.RECORDING_CANCELLED,
             trigger="cancel"
@@ -775,6 +779,10 @@ class PTTController:
             except asyncio.CancelledError:
                 pass
 
+        # Reset toggle mode flag if active
+        if self._toggle_active:
+            self._toggle_active = False
+
         # Cancel recording
         try:
             await self._recorder.cancel()
@@ -806,7 +814,13 @@ class PTTController:
                     "callback": "on_recording_cancel"
                 })
 
-        # Return to IDLE first (RECORDING_CANCELLED can only transition to IDLE)
+        # Transition to RECORDING_CANCELLED first
+        self._state_machine.transition(
+            PTTState.RECORDING_CANCELLED,
+            trigger="cancelled"
+        )
+
+        # Then transition to IDLE (RECORDING_CANCELLED can only transition to IDLE)
         self._state_machine.transition(
             PTTState.IDLE,
             trigger="complete"
