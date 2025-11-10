@@ -618,8 +618,10 @@ class PTTController:
         Args:
             event: Event data
         """
-        # Check minimum duration hasn't elapsed yet
-        if self._state_machine.current_state != PTTState.KEY_PRESSED:
+        # Check we're in a valid state for starting recording
+        # Accept both KEY_PRESSED and RECORDING states (race condition handling)
+        current_state = self._state_machine.current_state
+        if current_state not in (PTTState.KEY_PRESSED, PTTState.RECORDING):
             return
 
         # Start recording with error recovery
@@ -745,10 +747,11 @@ class PTTController:
                 })
 
         # Return to IDLE first (PROCESSING can only transition to IDLE)
-        self._state_machine.transition(
-            PTTState.IDLE,
-            trigger="complete"
-        )
+        if self._state_machine.current_state != PTTState.IDLE:
+            self._state_machine.transition(
+                PTTState.IDLE,
+                trigger="complete"
+            )
 
         # If still enabled, transition back to WAITING_FOR_KEY
         if self._enabled:
@@ -821,10 +824,11 @@ class PTTController:
         )
 
         # Then transition to IDLE (RECORDING_CANCELLED can only transition to IDLE)
-        self._state_machine.transition(
-            PTTState.IDLE,
-            trigger="complete"
-        )
+        if self._state_machine.current_state != PTTState.IDLE:
+            self._state_machine.transition(
+                PTTState.IDLE,
+                trigger="complete"
+            )
 
         # If still enabled, transition back to WAITING_FOR_KEY
         if self._enabled:
