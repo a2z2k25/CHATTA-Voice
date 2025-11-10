@@ -31,6 +31,12 @@ from .state_machine import (
     create_ptt_state_machine
 )
 from .controller import PTTController, create_ptt_controller
+from .recorder import (
+    PTTRecorder,
+    AsyncPTTRecorder,
+    create_ptt_recorder,
+    create_async_ptt_recorder
+)
 
 # Public API
 __all__ = [
@@ -53,4 +59,10 @@ __all__ = [
     # Controller
     "PTTController",
     "create_ptt_controller",
+
+    # Recorder
+    "PTTRecorder",
+    "AsyncPTTRecorder",
+    "create_ptt_recorder",
+    "create_async_ptt_recorder",
 ]

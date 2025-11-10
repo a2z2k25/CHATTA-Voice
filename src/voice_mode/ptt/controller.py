@@ -15,6 +15,7 @@ from voice_mode import config
 from .keyboard import KeyboardHandler
 from .state_machine import PTTStateMachine, PTTState
 from .logging import PTTLogger, get_ptt_logger
+from .recorder import AsyncPTTRecorder
 
 
 class PTTController:
@@ -82,6 +83,7 @@ class PTTController:
             on_state_change=self._on_state_change
         )
         self._keyboard: Optional[KeyboardHandler] = None
+        self._recorder = AsyncPTTRecorder(logger=self._logger)
 
         # Callbacks
         self._on_recording_start = on_recording_start
@@ -395,6 +397,15 @@ class PTTController:
         if self._state_machine.current_state != PTTState.KEY_PRESSED:
             return
 
+        # Start recording
+        try:
+            await self._recorder.start()
+        except Exception as e:
+            self._logger.log_error(e, {
+                "operation": "start_recorder"
+            })
+            return
+
         # Transition to RECORDING
         self._state_machine.transition(
             PTTState.RECORDING,
@@ -419,6 +430,15 @@ class PTTController:
         Args:
             event: Event data
         """
+        # Stop recording and get audio data
+        audio_data = None
+        try:
+            audio_data = await self._recorder.stop()
+        except Exception as e:
+            self._logger.log_error(e, {
+                "operation": "stop_recorder"
+            })
+
         # Transition to PROCESSING
         self._state_machine.transition(
             PTTState.PROCESSING,
@@ -428,8 +448,6 @@ class PTTController:
         # Call callback if provided
         if self._on_recording_stop:
             try:
-                # In real implementation, audio_data would come from recorder
-                audio_data = None  # Placeholder
                 result = self._on_recording_stop(audio_data)
                 if asyncio.iscoroutine(result):
                     await result
@@ -457,6 +475,14 @@ class PTTController:
         Args:
             event: Event data
         """
+        # Cancel recording
+        try:
+            await self._recorder.cancel()
+        except Exception as e:
+            self._logger.log_error(e, {
+                "operation": "cancel_recorder"
+            })
+
         # Call callback if provided
         if self._on_recording_cancel:
             try:
