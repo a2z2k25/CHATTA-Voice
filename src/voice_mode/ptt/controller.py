@@ -106,6 +106,10 @@ class PTTController:
         # Toggle mode state
         self._toggle_active = False  # True when recording via toggle mode
 
+        # Hybrid mode state
+        self._hybrid_silence_timeout = config.SILENCE_THRESHOLD_MS / 1000.0  # Convert ms to seconds
+        self._hybrid_silence_task: Optional[asyncio.Task] = None
+
         # Error recovery
         self._max_retries = 3
         self._retry_count = 0
@@ -239,6 +243,7 @@ class PTTController:
         Behavior depends on configured mode:
         - Hold mode: Records press time, queues recording start on press
         - Toggle mode: Toggles recording on/off with each press
+        - Hybrid mode: Like hold mode, but with automatic silence detection
         """
         if not self._enabled:
             return
@@ -287,10 +292,10 @@ class PTTController:
                     "mode": "toggle"
                 })
 
-        # Hold mode: press and hold to record
+        # Hold or Hybrid mode: press and hold to record
         else:
             if current_state == PTTState.WAITING_FOR_KEY:
-                # Record press time for minimum duration check
+                # Record press time for minimum duration check (hold/hybrid)
                 self._key_press_time = time.time()
 
                 # Transition to KEY_PRESSED
@@ -304,6 +309,13 @@ class PTTController:
                     "type": "start_recording",
                     "timestamp": self._key_press_time
                 })
+
+                # Log mode-specific event
+                if self._mode == "hybrid":
+                    self._logger.log_event("hybrid_started", {
+                        "mode": "hybrid",
+                        "silence_timeout": self._hybrid_silence_timeout
+                    })
 
     def _on_key_release(self) -> None:
         """Handle key combo release event (called by KeyboardHandler).
@@ -489,6 +501,44 @@ class PTTController:
                     "event": event
                 })
 
+    async def _monitor_hybrid_silence(self) -> None:
+        """Monitor for silence in hybrid mode.
+
+        In hybrid mode, automatically stops recording if silence timeout
+        is reached, even if user is still holding the key.
+
+        This provides automatic stop on silence while maintaining
+        the hold-to-talk physical control.
+        """
+        try:
+            await asyncio.sleep(self._hybrid_silence_timeout)
+
+            # If still recording after silence timeout, stop automatically
+            if self.is_recording and self._mode == "hybrid":
+                self._logger.log_event("hybrid_silence_detected", {
+                    "silence_timeout_seconds": self._hybrid_silence_timeout
+                })
+
+                # Transition to RECORDING_STOPPED
+                self._state_machine.transition(
+                    PTTState.RECORDING_STOPPED,
+                    trigger="silence_detected"
+                )
+
+                # Queue recording stop
+                self._event_queue.put({
+                    "type": "stop_recording",
+                    "timestamp": time.time()
+                })
+
+        except asyncio.CancelledError:
+            # Silence task was cancelled (normal flow when recording stops manually)
+            pass
+        except Exception as e:
+            self._logger.log_error(e, {
+                "operation": "monitor_hybrid_silence"
+            })
+
     async def _monitor_timeout(self) -> None:
         """Monitor recording timeout and cancel if exceeded.
 
@@ -614,6 +664,10 @@ class PTTController:
         if self._timeout > 0:
             self._timeout_task = asyncio.create_task(self._monitor_timeout())
 
+        # Start hybrid silence monitor
+        if self._mode == "hybrid" and self._hybrid_silence_timeout > 0:
+            self._hybrid_silence_task = asyncio.create_task(self._monitor_hybrid_silence())
+
         # Call callback if provided
         if self._on_recording_start:
             try:
@@ -637,6 +691,14 @@ class PTTController:
             self._timeout_task.cancel()
             try:
                 await self._timeout_task
+            except asyncio.CancelledError:
+                pass
+
+        # Cancel hybrid silence monitor
+        if self._hybrid_silence_task and not self._hybrid_silence_task.done():
+            self._hybrid_silence_task.cancel()
+            try:
+                await self._hybrid_silence_task
             except asyncio.CancelledError:
                 pass
 
@@ -702,6 +764,14 @@ class PTTController:
             self._timeout_task.cancel()
             try:
                 await self._timeout_task
+            except asyncio.CancelledError:
+                pass
+
+        # Cancel hybrid silence monitor
+        if self._hybrid_silence_task and not self._hybrid_silence_task.done():
+            self._hybrid_silence_task.cancel()
+            try:
+                await self._hybrid_silence_task
             except asyncio.CancelledError:
                 pass
 

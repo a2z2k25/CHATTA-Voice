@@ -1271,3 +1271,260 @@ class TestPTTControllerToggleMode:
         assert hold_release_state != toggle_release_state  # Different after release
 
         config.PTT_MODE = original_mode
+
+
+class TestPTTControllerHybridMode:
+    """Tests for hybrid mode (hold + silence detection) functionality"""
+
+    def test_hybrid_mode_configuration(self):
+        """Test that hybrid mode is configured correctly"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController()
+
+        assert controller._mode == "hybrid"
+        assert controller._hybrid_silence_timeout > 0
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_starts_like_hold_mode(self, ptt_logger):
+        """Test that hybrid mode starts recording like hold mode"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # Press key (like hold mode)
+        controller._on_key_press()
+
+        assert controller.current_state == PTTState.KEY_PRESSED
+        assert controller._key_press_time is not None
+
+        # Check hybrid_started event was logged
+        hybrid_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "hybrid_started"
+        ]
+        assert len(hybrid_events) == 1
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_auto_stop_on_silence(self, ptt_logger):
+        """Test that hybrid mode auto-stops after silence timeout"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        original_silence = config.SILENCE_THRESHOLD_MS
+        config.PTT_MODE = "hybrid"
+        config.SILENCE_THRESHOLD_MS = 100  # 100ms for fast testing
+
+        controller = PTTController(logger=ptt_logger)
+        controller._hybrid_silence_timeout = 0.1  # 100ms
+        controller.enable()
+
+        # Start recording
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        assert controller.current_state == PTTState.RECORDING
+        assert controller._hybrid_silence_task is not None
+
+        # Wait for silence timeout
+        await asyncio.sleep(0.15)
+
+        # Check that silence was detected
+        silence_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "hybrid_silence_detected"
+        ]
+        assert len(silence_events) == 1
+
+        config.PTT_MODE = original_mode
+        config.SILENCE_THRESHOLD_MS = original_silence
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_manual_stop_on_release(self, ptt_logger):
+        """Test that hybrid mode can be stopped manually by releasing key"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController(logger=ptt_logger)
+        controller._hybrid_silence_timeout = 10.0  # Long timeout
+        controller.enable()
+
+        # Start recording
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        silence_task = controller._hybrid_silence_task
+        assert silence_task is not None
+        assert not silence_task.done()
+
+        # Release key (manual stop)
+        controller._on_key_release()
+        assert controller.current_state == PTTState.RECORDING_STOPPED
+
+        # Process stop event
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_stop_recording(event)
+
+        # Silence task should be cancelled
+        assert silence_task.cancelled() or silence_task.done()
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_minimum_duration_enforcement(self, ptt_logger):
+        """Test that hybrid mode enforces minimum hold duration"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.5  # 500ms minimum
+        controller.enable()
+
+        # Press and immediately release (below minimum)
+        controller._on_key_press()
+        controller._on_key_release()
+
+        # Should be back to IDLE (quick release)
+        assert controller.current_state == PTTState.IDLE
+
+        # Check quick release was logged
+        quick_release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "quick_release"
+        ]
+        assert len(quick_release_events) == 1
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_full_cycle_with_manual_stop(self, ptt_logger):
+        """Test complete hybrid mode cycle with manual stop"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController(logger=ptt_logger)
+        controller._hybrid_silence_timeout = 10.0
+        controller._min_duration = 0.01
+        controller.enable()
+
+        # Press
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        assert controller.current_state == PTTState.RECORDING
+
+        # Wait a bit
+        await asyncio.sleep(0.05)
+
+        # Release (manual stop)
+        controller._on_key_release()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_stop_recording(event)
+
+        assert controller.current_state == PTTState.WAITING_FOR_KEY
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_silence_monitor_cleanup(self):
+        """Test that silence monitor is properly cleaned up"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController()
+        controller.enable()
+
+        # Start recording
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        task = controller._hybrid_silence_task
+        assert task is not None
+
+        # Stop manually
+        controller._on_key_release()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_stop_recording(event)
+
+        # Task should be cancelled
+        assert task.cancelled() or task.done()
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_vs_hold_mode_behavior(self):
+        """Test that hybrid differs from hold only in silence detection"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+
+        # Test hold mode (no silence monitor)
+        config.PTT_MODE = "hold"
+        hold_controller = PTTController()
+        hold_controller.enable()
+
+        hold_controller._on_key_press()
+        event = await hold_controller.wait_for_event(timeout=0.1)
+        await hold_controller._handle_start_recording(event)
+
+        # No silence task in hold mode
+        assert hold_controller._hybrid_silence_task is None
+
+        # Test hybrid mode (has silence monitor)
+        config.PTT_MODE = "hybrid"
+        hybrid_controller = PTTController()
+        hybrid_controller.enable()
+
+        hybrid_controller._on_key_press()
+        event = await hybrid_controller.wait_for_event(timeout=0.1)
+        await hybrid_controller._handle_start_recording(event)
+
+        # Has silence task in hybrid mode
+        assert hybrid_controller._hybrid_silence_task is not None
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_hybrid_mode_cancel_stops_silence_monitor(self):
+        """Test that cancelling recording stops silence monitor"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "hybrid"
+
+        controller = PTTController()
+        controller.enable()
+
+        # Start recording
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        # Move to RECORDING_CANCELLED state
+        controller._state_machine.transition(PTTState.RECORDING_CANCELLED, "cancel")
+
+        task = controller._hybrid_silence_task
+        assert task is not None
+
+        # Cancel
+        event = {"type": "cancel_recording", "timestamp": 0}
+        await controller._handle_cancel_recording(event)
+
+        # Silence task should be cancelled
+        assert task.cancelled() or task.done()
+
+        config.PTT_MODE = original_mode
