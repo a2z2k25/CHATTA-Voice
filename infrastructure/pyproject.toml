@@ -40,6 +40,7 @@ dependencies = [
     "simpleaudio",
     "httpx",
     "psutil>=5.9.0",
+    "pynput>=1.7.6",  # Cross-platform keyboard monitoring for PTT
     "setuptools",  # Required for pkg_resources used by webrtcvad
     "webrtcvad>=2.0.10",
     "livekit>=0.13.1",
