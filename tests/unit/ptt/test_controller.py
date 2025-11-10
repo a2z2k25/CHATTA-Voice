@@ -1003,3 +1003,271 @@ class TestPTTControllerHoldMode:
         ]
         assert len(release_events) == 1
         assert release_events[0].data["hold_duration_seconds"] >= 0.2
+
+
+class TestPTTControllerToggleMode:
+    """Tests for toggle mode (press to start/stop) functionality"""
+
+    def test_toggle_mode_configuration(self):
+        """Test that controller can be configured for toggle mode"""
+        # Temporarily set mode to toggle
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController()
+        assert controller._mode == "toggle"
+
+        # Restore original
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_start_recording(self, ptt_logger):
+        """Test first press starts recording in toggle mode"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # First press should start recording
+        controller._on_key_press()
+
+        assert controller.current_state == PTTState.KEY_PRESSED
+        assert controller._toggle_active is True
+
+        # Check toggle_started event was logged
+        toggle_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_started"
+        ]
+        assert len(toggle_events) == 1
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_stop_recording(self, ptt_logger):
+        """Test second press stops recording in toggle mode"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # First press - start
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        assert controller.current_state == PTTState.RECORDING
+        assert controller._toggle_active is True
+
+        # Second press - stop
+        controller._on_key_press()
+
+        assert controller.current_state == PTTState.RECORDING_STOPPED
+        assert controller._toggle_active is False
+
+        # Check toggle_stopped event was logged
+        toggle_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_stopped"
+        ]
+        assert len(toggle_events) == 1
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_ignores_key_release(self):
+        """Test that toggle mode ignores key release events"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController()
+        controller.enable()
+
+        # Press to start
+        controller._on_key_press()
+        initial_state = controller.current_state
+
+        # Release should be ignored
+        controller._on_key_release()
+
+        # State should not change
+        assert controller.current_state == initial_state
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_full_cycle(self, ptt_logger):
+        """Test complete toggle mode cycle: press, record, press, stop"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # First press - start
+        controller._on_key_press()
+        assert controller._toggle_active is True
+
+        # Process start event
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+        assert controller.current_state == PTTState.RECORDING
+
+        # Simulate recording for a bit
+        await asyncio.sleep(0.05)
+
+        # Second press - stop
+        controller._on_key_press()
+        assert controller._toggle_active is False
+
+        # Process stop event
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_stop_recording(event)
+
+        # Should be back to WAITING_FOR_KEY
+        assert controller.current_state == PTTState.WAITING_FOR_KEY
+
+        # Check both toggle events were logged
+        start_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_started"
+        ]
+        stop_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_stopped"
+        ]
+        assert len(start_events) == 1
+        assert len(stop_events) == 1
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_multiple_cycles(self, ptt_logger):
+        """Test multiple toggle on/off cycles"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        for i in range(3):
+            # Toggle on
+            controller._on_key_press()
+            assert controller._toggle_active is True
+
+            event = await controller.wait_for_event(timeout=0.1)
+            await controller._handle_start_recording(event)
+
+            await asyncio.sleep(0.02)
+
+            # Toggle off
+            controller._on_key_press()
+            assert controller._toggle_active is False
+
+            event = await controller.wait_for_event(timeout=0.1)
+            await controller._handle_stop_recording(event)
+
+            assert controller.current_state == PTTState.WAITING_FOR_KEY
+
+        # Check we have 3 start and 3 stop events
+        start_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_started"
+        ]
+        stop_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "toggle_stopped"
+        ]
+        assert len(start_events) == 3
+        assert len(stop_events) == 3
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_press_while_not_recording_ignored(self):
+        """Test that extra presses in wrong state are ignored"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController()
+        controller.enable()
+
+        # First press should work
+        controller._on_key_press()
+        assert controller.current_state == PTTState.KEY_PRESSED
+
+        # Second press while still in KEY_PRESSED (not RECORDING) should be ignored
+        controller._on_key_press()
+        # State shouldn't change since we're not in RECORDING yet
+        assert controller.current_state == PTTState.KEY_PRESSED
+
+        config.PTT_MODE = original_mode
+
+    def test_toggle_mode_state_persists_across_releases(self):
+        """Test that toggle state persists even when key is released"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+        config.PTT_MODE = "toggle"
+
+        controller = PTTController()
+        controller.enable()
+
+        # Press to activate toggle
+        controller._on_key_press()
+        assert controller._toggle_active is True
+
+        # Release multiple times - should not affect toggle state
+        for _ in range(5):
+            controller._on_key_release()
+
+        # Toggle should still be active
+        assert controller._toggle_active is True
+
+        config.PTT_MODE = original_mode
+
+    @pytest.mark.asyncio
+    async def test_toggle_mode_vs_hold_mode_behavior(self):
+        """Test that toggle and hold modes behave differently"""
+        import voice_mode.config as config
+        original_mode = config.PTT_MODE
+
+        # Test hold mode behavior
+        config.PTT_MODE = "hold"
+        hold_controller = PTTController()
+        hold_controller.enable()
+
+        hold_controller._on_key_press()
+        hold_press_state = hold_controller.current_state
+
+        hold_controller._on_key_release()
+        # In hold mode, quick release changes state
+        hold_release_state = hold_controller.current_state
+
+        # Test toggle mode behavior
+        config.PTT_MODE = "toggle"
+        toggle_controller = PTTController()
+        toggle_controller.enable()
+
+        toggle_controller._on_key_press()
+        toggle_press_state = toggle_controller.current_state
+
+        toggle_controller._on_key_release()
+        # In toggle mode, release is ignored
+        toggle_release_state = toggle_controller.current_state
+
+        # States should be different after release
+        # Hold mode: press then release changes state
+        # Toggle mode: press then release keeps state
+        assert hold_press_state == toggle_press_state  # Both KEY_PRESSED initially
+        assert hold_release_state != toggle_release_state  # Different after release
+
+        config.PTT_MODE = original_mode

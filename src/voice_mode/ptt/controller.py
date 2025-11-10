@@ -103,6 +103,9 @@ class PTTController:
         self._timeout_task: Optional[asyncio.Task] = None
         self._key_press_time: Optional[float] = None
 
+        # Toggle mode state
+        self._toggle_active = False  # True when recording via toggle mode
+
         # Error recovery
         self._max_retries = 3
         self._retry_count = 0
@@ -233,38 +236,90 @@ class PTTController:
     def _on_key_press(self) -> None:
         """Handle key combo press event (called by KeyboardHandler).
 
-        For hold mode: Records the press time and queues recording start.
+        Behavior depends on configured mode:
+        - Hold mode: Records press time, queues recording start on press
+        - Toggle mode: Toggles recording on/off with each press
         """
         if not self._enabled:
             return
 
         current_state = self._state_machine.current_state
 
-        if current_state == PTTState.WAITING_FOR_KEY:
-            # Record press time for minimum duration check
-            self._key_press_time = time.time()
+        # Toggle mode: press once to start, press again to stop
+        if self._mode == "toggle":
+            if current_state == PTTState.WAITING_FOR_KEY and not self._toggle_active:
+                # Start recording (first press)
+                self._toggle_active = True
 
-            # Transition to KEY_PRESSED
-            self._state_machine.transition(
-                PTTState.KEY_PRESSED,
-                trigger="key_down"
-            )
+                # Transition to KEY_PRESSED
+                self._state_machine.transition(
+                    PTTState.KEY_PRESSED,
+                    trigger="key_down"
+                )
 
-            # Queue recording start
-            self._event_queue.put({
-                "type": "start_recording",
-                "timestamp": self._key_press_time
-            })
+                # Queue recording start
+                self._event_queue.put({
+                    "type": "start_recording",
+                    "timestamp": time.time()
+                })
+
+                self._logger.log_event("toggle_started", {
+                    "mode": "toggle"
+                })
+
+            elif current_state == PTTState.RECORDING and self._toggle_active:
+                # Stop recording (second press)
+                self._toggle_active = False
+
+                # Transition to RECORDING_STOPPED
+                self._state_machine.transition(
+                    PTTState.RECORDING_STOPPED,
+                    trigger="toggle_off"
+                )
+
+                # Queue recording stop
+                self._event_queue.put({
+                    "type": "stop_recording",
+                    "timestamp": time.time()
+                })
+
+                self._logger.log_event("toggle_stopped", {
+                    "mode": "toggle"
+                })
+
+        # Hold mode: press and hold to record
+        else:
+            if current_state == PTTState.WAITING_FOR_KEY:
+                # Record press time for minimum duration check
+                self._key_press_time = time.time()
+
+                # Transition to KEY_PRESSED
+                self._state_machine.transition(
+                    PTTState.KEY_PRESSED,
+                    trigger="key_down"
+                )
+
+                # Queue recording start
+                self._event_queue.put({
+                    "type": "start_recording",
+                    "timestamp": self._key_press_time
+                })
 
     def _on_key_release(self) -> None:
         """Handle key combo release event (called by KeyboardHandler).
 
-        For hold mode: Checks minimum hold duration before stopping recording.
-        If released too quickly, cancels the recording.
+        Behavior depends on configured mode:
+        - Hold mode: Checks minimum hold duration, stops recording on release
+        - Toggle mode: Ignores release events (toggle on press only)
         """
         if not self._enabled:
             return
 
+        # Toggle mode: ignore release events
+        if self._mode == "toggle":
+            return
+
+        # Hold mode: handle release with minimum duration check
         current_state = self._state_machine.current_state
 
         # Calculate hold duration
