@@ -98,6 +98,11 @@ class PTTController:
         # Recording state
         self._recording_start_time: Optional[float] = None
         self._recording_task: Optional[asyncio.Task] = None
+        self._timeout_task: Optional[asyncio.Task] = None
+
+        # Error recovery
+        self._max_retries = 3
+        self._retry_count = 0
 
         # Log initialization
         self._logger.log_event("controller_initialized", {
@@ -387,6 +392,75 @@ class PTTController:
                     "event": event
                 })
 
+    async def _monitor_timeout(self) -> None:
+        """Monitor recording timeout and cancel if exceeded.
+
+        This coroutine runs in parallel with recording and cancels
+        the recording if it exceeds the configured timeout.
+        """
+        try:
+            await asyncio.sleep(self._timeout)
+
+            # If still recording after timeout, cancel it
+            if self.is_recording:
+                self._logger.log_event("recording_timeout", {
+                    "timeout_seconds": self._timeout,
+                    "actual_duration": time.time() - self._recording_start_time if self._recording_start_time else 0
+                })
+
+                # Cancel recording
+                self._cancel_recording()
+
+        except asyncio.CancelledError:
+            # Timeout task was cancelled (normal flow when recording stops)
+            pass
+        except Exception as e:
+            self._logger.log_error(e, {
+                "operation": "monitor_timeout"
+            })
+
+    async def _recover_from_error(self, operation: str, error: Exception) -> bool:
+        """Attempt to recover from recording error.
+
+        Args:
+            operation: The operation that failed
+            error: The exception that occurred
+
+        Returns:
+            True if recovery successful, False otherwise
+        """
+        if self._retry_count >= self._max_retries:
+            self._logger.log_event("recovery_failed", {
+                "operation": operation,
+                "retry_count": self._retry_count,
+                "max_retries": self._max_retries,
+                "error": str(error)
+            })
+            self._retry_count = 0
+            return False
+
+        self._retry_count += 1
+
+        self._logger.log_event("attempting_recovery", {
+            "operation": operation,
+            "retry_attempt": self._retry_count,
+            "error": str(error)
+        })
+
+        # Wait a bit before retry
+        await asyncio.sleep(0.1 * self._retry_count)
+
+        # Try to reset recorder state
+        try:
+            if self._recorder.is_recording:
+                await self._recorder.cancel()
+        except Exception as cancel_error:
+            self._logger.log_error(cancel_error, {
+                "operation": "recovery_cancel"
+            })
+
+        return True
+
     async def _handle_start_recording(self, event: Dict[str, Any]) -> None:
         """Handle start recording event.
 
@@ -397,20 +471,51 @@ class PTTController:
         if self._state_machine.current_state != PTTState.KEY_PRESSED:
             return
 
-        # Start recording
+        # Start recording with error recovery
+        retry_attempted = False
         try:
             await self._recorder.start()
         except Exception as e:
             self._logger.log_error(e, {
                 "operation": "start_recorder"
             })
-            return
+
+            # Attempt recovery
+            if await self._recover_from_error("start_recorder", e):
+                retry_attempted = True
+                try:
+                    await self._recorder.start()
+                except Exception as retry_error:
+                    self._logger.log_error(retry_error, {
+                        "operation": "start_recorder_retry"
+                    })
+                    # Return to IDLE state
+                    self._state_machine.transition(
+                        PTTState.IDLE,
+                        trigger="start_failed"
+                    )
+                    return
+            else:
+                # Recovery failed, return to IDLE
+                self._state_machine.transition(
+                    PTTState.IDLE,
+                    trigger="start_failed"
+                )
+                return
+
+        # Reset retry count on success
+        if not retry_attempted:
+            self._retry_count = 0
 
         # Transition to RECORDING
         self._state_machine.transition(
             PTTState.RECORDING,
             trigger="recording_started"
         )
+
+        # Start timeout monitor
+        if self._timeout > 0:
+            self._timeout_task = asyncio.create_task(self._monitor_timeout())
 
         # Call callback if provided
         if self._on_recording_start:
@@ -430,14 +535,34 @@ class PTTController:
         Args:
             event: Event data
         """
+        # Cancel timeout monitor
+        if self._timeout_task and not self._timeout_task.done():
+            self._timeout_task.cancel()
+            try:
+                await self._timeout_task
+            except asyncio.CancelledError:
+                pass
+
         # Stop recording and get audio data
         audio_data = None
         try:
             audio_data = await self._recorder.stop()
+            # Reset retry count on successful stop
+            self._retry_count = 0
         except Exception as e:
             self._logger.log_error(e, {
                 "operation": "stop_recorder"
             })
+
+            # Attempt recovery
+            if await self._recover_from_error("stop_recorder", e):
+                try:
+                    audio_data = await self._recorder.stop()
+                except Exception as retry_error:
+                    self._logger.log_error(retry_error, {
+                        "operation": "stop_recorder_retry"
+                    })
+                    # Continue with None audio data
 
         # Transition to PROCESSING
         self._state_machine.transition(
@@ -475,13 +600,33 @@ class PTTController:
         Args:
             event: Event data
         """
+        # Cancel timeout monitor
+        if self._timeout_task and not self._timeout_task.done():
+            self._timeout_task.cancel()
+            try:
+                await self._timeout_task
+            except asyncio.CancelledError:
+                pass
+
         # Cancel recording
         try:
             await self._recorder.cancel()
+            # Reset retry count on successful cancel
+            self._retry_count = 0
         except Exception as e:
             self._logger.log_error(e, {
                 "operation": "cancel_recorder"
             })
+
+            # Attempt recovery for cancel operation
+            if await self._recover_from_error("cancel_recorder", e):
+                try:
+                    await self._recorder.cancel()
+                except Exception as retry_error:
+                    self._logger.log_error(retry_error, {
+                        "operation": "cancel_recorder_retry"
+                    })
+                    # Continue anyway - best effort
 
         # Call callback if provided
         if self._on_recording_cancel:

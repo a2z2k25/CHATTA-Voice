@@ -7,6 +7,7 @@ keyboard handling, state management, and event processing.
 
 import pytest
 import asyncio
+import numpy as np
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from voice_mode.ptt import (
     PTTController,
@@ -503,3 +504,275 @@ class TestPTTControllerIntegration:
         # Should be back to IDLE
         assert controller.current_state == PTTState.IDLE
         assert controller.is_enabled is False
+
+
+class TestPTTControllerErrorRecovery:
+    """Tests for error recovery and timeout handling"""
+
+    @pytest.mark.asyncio
+    async def test_timeout_monitoring(self, ptt_logger):
+        """Test that recording is cancelled after timeout"""
+        controller = PTTController(timeout=0.1, logger=ptt_logger)
+        controller.enable()
+
+        # Get to RECORDING state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+
+        # Start recording
+        event = {"type": "start_recording", "timestamp": 0}
+        await controller._handle_start_recording(event)
+
+        assert controller.is_recording is True
+        assert controller._timeout_task is not None
+
+        # Wait for timeout
+        await asyncio.sleep(0.15)
+
+        # Should have timed out and cancelled
+        timeout_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "recording_timeout"
+        ]
+        assert len(timeout_events) >= 1
+
+    @pytest.mark.asyncio
+    async def test_timeout_task_cancelled_on_stop(self):
+        """Test that timeout task is cancelled when recording stops normally"""
+        controller = PTTController(timeout=10.0)
+        controller.enable()
+
+        # Get to RECORDING state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+        event = {"type": "start_recording", "timestamp": 0}
+        await controller._handle_start_recording(event)
+
+        timeout_task = controller._timeout_task
+        assert timeout_task is not None
+        assert not timeout_task.done()
+
+        # Stop recording
+        controller._state_machine.transition(PTTState.RECORDING_STOPPED, "stop")
+        event = {"type": "stop_recording", "timestamp": 0}
+        await controller._handle_stop_recording(event)
+
+        # Timeout task should be cancelled
+        assert timeout_task.cancelled() or timeout_task.done()
+
+    @pytest.mark.asyncio
+    async def test_timeout_task_cancelled_on_cancel(self):
+        """Test that timeout task is cancelled when recording is cancelled"""
+        controller = PTTController(timeout=10.0)
+        controller.enable()
+
+        # Get to RECORDING state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+        event = {"type": "start_recording", "timestamp": 0}
+        await controller._handle_start_recording(event)
+
+        timeout_task = controller._timeout_task
+        assert timeout_task is not None
+
+        # Cancel recording
+        controller._state_machine.transition(PTTState.RECORDING_CANCELLED, "cancel")
+        event = {"type": "cancel_recording", "timestamp": 0}
+        await controller._handle_cancel_recording(event)
+
+        # Timeout task should be cancelled
+        assert timeout_task.cancelled() or timeout_task.done()
+
+    @pytest.mark.asyncio
+    async def test_error_recovery_on_start_failure(self, ptt_logger):
+        """Test automatic recovery when start recording fails"""
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # Make recorder.start() fail once then succeed
+        call_count = [0]
+
+        async def failing_start():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise RuntimeError("Audio device busy")
+            return True
+
+        controller._recorder.start = failing_start
+
+        # Get to KEY_PRESSED state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+
+        # Handle start event
+        event = {"type": "start_recording", "timestamp": 0}
+        await controller._handle_start_recording(event)
+
+        # Should have recovered and be in RECORDING state
+        assert controller.current_state == PTTState.RECORDING
+        assert call_count[0] == 2  # Called twice (fail + retry)
+
+        # Check recovery was logged
+        recovery_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "attempting_recovery"
+        ]
+        assert len(recovery_events) == 1
+
+    @pytest.mark.asyncio
+    async def test_error_recovery_fails_after_max_retries(self, ptt_logger):
+        """Test that recovery fails after max retries"""
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+        controller._max_retries = 2
+
+        # Make recorder.start() always fail
+        async def always_fail():
+            raise RuntimeError("Permanent audio device failure")
+
+        controller._recorder.start = always_fail
+
+        # Get to KEY_PRESSED state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+
+        # Handle start event
+        event = {"type": "start_recording", "timestamp": 0}
+        await controller._handle_start_recording(event)
+
+        # Should have returned to IDLE after failed recovery
+        assert controller.current_state == PTTState.IDLE
+        assert controller._retry_count == 0  # Reset after failure
+
+        # Check recovery failure was logged
+        failure_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "recovery_failed"
+        ]
+        assert len(failure_events) == 1
+
+    @pytest.mark.asyncio
+    async def test_error_recovery_on_stop_failure(self, ptt_logger):
+        """Test recovery when stop recording fails"""
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # Get to RECORDING_STOPPED state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+        controller._state_machine.transition(PTTState.RECORDING, "start")
+        controller._state_machine.transition(PTTState.RECORDING_STOPPED, "stop")
+
+        # Make stop fail once then succeed
+        call_count = [0]
+
+        async def failing_stop():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise RuntimeError("Stop failed")
+            return np.array([1, 2, 3])
+
+        controller._recorder.stop = failing_stop
+
+        # Handle stop event
+        event = {"type": "stop_recording", "timestamp": 0}
+        await controller._handle_stop_recording(event)
+
+        # Should have recovered
+        assert call_count[0] == 2  # Called twice
+
+        # Check recovery was logged
+        recovery_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "attempting_recovery"
+        ]
+        assert len(recovery_events) == 1
+
+    @pytest.mark.asyncio
+    async def test_retry_count_reset_on_success(self):
+        """Test that retry count resets after successful operation"""
+        controller = PTTController()
+        controller.enable()
+
+        # Simulate some retries
+        controller._retry_count = 2
+
+        # Get to RECORDING_STOPPED state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+        controller._state_machine.transition(PTTState.RECORDING, "start")
+        controller._state_machine.transition(PTTState.RECORDING_STOPPED, "stop")
+
+        # Handle successful stop
+        event = {"type": "stop_recording", "timestamp": 0}
+        await controller._handle_stop_recording(event)
+
+        # Retry count should be reset
+        assert controller._retry_count == 0
+
+    @pytest.mark.asyncio
+    async def test_recovery_attempts_recorder_cancel(self, ptt_logger):
+        """Test that recovery attempts to cancel recorder"""
+        controller = PTTController(logger=ptt_logger)
+
+        # Mock recorder in recording state
+        controller._recorder._is_recording = True
+        cancel_called = [False]
+
+        async def mock_cancel():
+            cancel_called[0] = True
+
+        controller._recorder.cancel = mock_cancel
+
+        # Trigger recovery
+        await controller._recover_from_error("test_op", RuntimeError("test"))
+
+        # Should have called cancel
+        assert cancel_called[0] is True
+
+    @pytest.mark.asyncio
+    async def test_recovery_handles_cancel_failure(self, ptt_logger):
+        """Test that recovery handles cancel failures gracefully"""
+        controller = PTTController(logger=ptt_logger)
+
+        # Mock recorder that fails on cancel
+        controller._recorder._is_recording = True
+
+        async def failing_cancel():
+            raise RuntimeError("Cancel failed")
+
+        controller._recorder.cancel = failing_cancel
+
+        # Should not raise
+        result = await controller._recover_from_error("test_op", RuntimeError("test"))
+
+        # Recovery should still succeed despite cancel failure
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_error_recovery_on_cancel_failure(self, ptt_logger):
+        """Test recovery when cancel recording fails"""
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # Get to RECORDING_CANCELLED state
+        controller._state_machine.transition(PTTState.KEY_PRESSED, "key_down")
+        controller._state_machine.transition(PTTState.RECORDING, "start")
+        controller._state_machine.transition(PTTState.RECORDING_CANCELLED, "cancel")
+
+        # Make cancel fail once then succeed
+        call_count = [0]
+
+        async def failing_cancel():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise RuntimeError("Cancel failed")
+
+        controller._recorder.cancel = failing_cancel
+
+        # Handle cancel event
+        event = {"type": "cancel_recording", "timestamp": 0}
+        await controller._handle_cancel_recording(event)
+
+        # Should have attempted recovery
+        assert call_count[0] == 2
+
+        # Check recovery was logged
+        recovery_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "attempting_recovery"
+        ]
+        assert len(recovery_events) == 1
