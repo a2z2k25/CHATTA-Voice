@@ -842,7 +842,10 @@ class PTTController:
                 - state: Current state name
                 - is_recording: Whether currently recording
                 - key_combo: Configured key combination
+                - cancel_key: Configured cancel key
                 - timeout: Configured timeout
+                - mode: PTT mode (hold/toggle/hybrid)
+                - toggle_active: Toggle mode flag
 
         Example:
             >>> status = controller.get_status()
@@ -856,6 +859,8 @@ class PTTController:
             "key_combo": self._key_combo,
             "cancel_key": self._cancel_key,
             "timeout": self._timeout,
+            "mode": self._mode,
+            "toggle_active": self._toggle_active,
             "state_machine": self._state_machine.get_state_summary()
         }
 

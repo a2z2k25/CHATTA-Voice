@@ -354,7 +354,12 @@ def get_ptt_logger() -> PTTLogger:
     return _ptt_logger
 
 
-def reset_ptt_logger():
-    """Reset the global PTT logger (useful for testing)"""
+def reset_ptt_logger() -> PTTLogger:
+    """Reset the global PTT logger (useful for testing)
+
+    Returns:
+        The new PTTLogger instance
+    """
     global _ptt_logger
     _ptt_logger = None
+    return get_ptt_logger()
