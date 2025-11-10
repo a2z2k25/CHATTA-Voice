@@ -776,3 +776,230 @@ class TestPTTControllerErrorRecovery:
             if e.event_type == "attempting_recovery"
         ]
         assert len(recovery_events) == 1
+
+
+class TestPTTControllerHoldMode:
+    """Tests for hold mode (press-and-hold) functionality"""
+
+    def test_hold_mode_configuration(self):
+        """Test that hold mode is configured correctly"""
+        controller = PTTController()
+
+        assert controller._mode == "hold"
+        assert controller._min_duration > 0
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_press_and_hold_flow(self, ptt_logger):
+        """Test complete press-and-hold recording flow"""
+        controller = PTTController(logger=ptt_logger)
+        controller.enable()
+
+        # Press key
+        controller._on_key_press()
+        assert controller.current_state == PTTState.KEY_PRESSED
+        assert controller._key_press_time is not None
+
+        # Process start event
+        event = await controller.wait_for_event(timeout=0.1)
+        assert event["type"] == "start_recording"
+        await controller._handle_start_recording(event)
+        assert controller.current_state == PTTState.RECORDING
+
+        # Hold for minimum duration
+        await asyncio.sleep(0.1)
+
+        # Release key
+        controller._on_key_release()
+        assert controller.current_state == PTTState.RECORDING_STOPPED
+
+        # Check key released event was logged
+        release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "key_released"
+        ]
+        assert len(release_events) == 1
+        assert release_events[0].data["state"] == "recording"
+
+    def test_hold_mode_quick_release_below_minimum(self, ptt_logger):
+        """Test that quick release below minimum duration cancels"""
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.5  # 500ms minimum
+        controller.enable()
+
+        # Press key
+        controller._on_key_press()
+        press_time = controller._key_press_time
+
+        # Immediately release (well below 500ms)
+        controller._on_key_release()
+
+        # Should be back to IDLE
+        assert controller.current_state == PTTState.IDLE
+
+        # Check quick release was logged
+        quick_release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "quick_release"
+        ]
+        assert len(quick_release_events) == 1
+        assert quick_release_events[0].data["hold_duration_seconds"] < 0.5
+        assert quick_release_events[0].data["min_duration_seconds"] == 0.5
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_release_after_minimum_before_recording(self, ptt_logger):
+        """Test release after minimum duration but before recording starts"""
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.01  # 10ms minimum
+        controller.enable()
+
+        # Press key
+        controller._on_key_press()
+        assert controller.current_state == PTTState.KEY_PRESSED
+
+        # Wait for minimum duration but don't process start event
+        await asyncio.sleep(0.02)
+
+        # Release key (still in KEY_PRESSED state, not RECORDING)
+        controller._on_key_release()
+
+        # Should be back to IDLE
+        assert controller.current_state == PTTState.IDLE
+
+        # Check released_before_recording event was logged
+        release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "released_before_recording"
+        ]
+        assert len(release_events) == 1
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_press_time_tracking(self):
+        """Test that press time is tracked correctly"""
+        import time
+        controller = PTTController()
+        controller.enable()
+
+        before_press = time.time()
+        controller._on_key_press()
+        after_press = time.time()
+
+        assert controller._key_press_time is not None
+        assert before_press <= controller._key_press_time <= after_press
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_press_time_cleared_on_quick_release(self):
+        """Test that press time is cleared after quick release"""
+        controller = PTTController()
+        controller._min_duration = 1.0  # 1 second minimum
+        controller.enable()
+
+        controller._on_key_press()
+        assert controller._key_press_time is not None
+
+        # Quick release
+        controller._on_key_release()
+
+        # Press time should be cleared
+        assert controller._key_press_time is None
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_duration_calculation(self, ptt_logger):
+        """Test that hold duration is calculated correctly"""
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.05  # 50ms
+        controller.enable()
+
+        # Press and start recording
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        # Hold for a specific duration
+        await asyncio.sleep(0.1)  # 100ms
+
+        # Release
+        controller._on_key_release()
+
+        # Check logged duration
+        release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "key_released"
+        ]
+        assert len(release_events) == 1
+        # Should be around 100ms (with some tolerance)
+        assert 0.08 <= release_events[0].data["hold_duration_seconds"] <= 0.15
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_multiple_press_release_cycles(self, ptt_logger):
+        """Test multiple press-release cycles"""
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.01
+        controller.enable()
+
+        for i in range(3):
+            # Press
+            controller._on_key_press()
+            assert controller._key_press_time is not None
+
+            # Start recording
+            event = await controller.wait_for_event(timeout=0.1)
+            await controller._handle_start_recording(event)
+
+            # Wait
+            await asyncio.sleep(0.02)
+
+            # Release
+            controller._on_key_release()
+
+            # Process stop event
+            event = await controller.wait_for_event(timeout=0.1)
+            await controller._handle_stop_recording(event)
+
+            # Should be back to WAITING_FOR_KEY
+            assert controller.current_state == PTTState.WAITING_FOR_KEY
+
+        # Check we have 3 release events
+        release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "key_released"
+        ]
+        assert len(release_events) == 3
+
+    def test_hold_mode_zero_minimum_duration(self):
+        """Test that zero minimum duration allows immediate release"""
+        controller = PTTController()
+        controller._min_duration = 0.0
+        controller.enable()
+
+        # Press and immediately release
+        controller._on_key_press()
+        controller._on_key_release()
+
+        # Should not trigger quick_release since minimum is 0
+        assert controller.current_state == PTTState.IDLE
+
+    @pytest.mark.asyncio
+    async def test_hold_mode_long_hold(self, ptt_logger):
+        """Test holding for extended period"""
+        controller = PTTController(logger=ptt_logger)
+        controller._min_duration = 0.01
+        controller.enable()
+
+        # Press
+        controller._on_key_press()
+        event = await controller.wait_for_event(timeout=0.1)
+        await controller._handle_start_recording(event)
+
+        # Hold for longer period
+        await asyncio.sleep(0.2)
+
+        # Release
+        controller._on_key_release()
+
+        # Check duration
+        release_events = [
+            e for e in ptt_logger.events
+            if e.event_type == "key_released"
+        ]
+        assert len(release_events) == 1
+        assert release_events[0].data["hold_duration_seconds"] >= 0.2

@@ -75,6 +75,8 @@ class PTTController:
         self._key_combo = key_combo or config.PTT_KEY_COMBO
         self._cancel_key = cancel_key or config.PTT_CANCEL_KEY
         self._timeout = timeout or config.PTT_TIMEOUT
+        self._mode = config.PTT_MODE
+        self._min_duration = config.PTT_MIN_DURATION
 
         # Components
         self._logger = logger or get_ptt_logger()
@@ -99,6 +101,7 @@ class PTTController:
         self._recording_start_time: Optional[float] = None
         self._recording_task: Optional[asyncio.Task] = None
         self._timeout_task: Optional[asyncio.Task] = None
+        self._key_press_time: Optional[float] = None
 
         # Error recovery
         self._max_retries = 3
@@ -228,13 +231,19 @@ class PTTController:
         return True
 
     def _on_key_press(self) -> None:
-        """Handle key combo press event (called by KeyboardHandler)."""
+        """Handle key combo press event (called by KeyboardHandler).
+
+        For hold mode: Records the press time and queues recording start.
+        """
         if not self._enabled:
             return
 
         current_state = self._state_machine.current_state
 
         if current_state == PTTState.WAITING_FOR_KEY:
+            # Record press time for minimum duration check
+            self._key_press_time = time.time()
+
             # Transition to KEY_PRESSED
             self._state_machine.transition(
                 PTTState.KEY_PRESSED,
@@ -244,15 +253,24 @@ class PTTController:
             # Queue recording start
             self._event_queue.put({
                 "type": "start_recording",
-                "timestamp": time.time()
+                "timestamp": self._key_press_time
             })
 
     def _on_key_release(self) -> None:
-        """Handle key combo release event (called by KeyboardHandler)."""
+        """Handle key combo release event (called by KeyboardHandler).
+
+        For hold mode: Checks minimum hold duration before stopping recording.
+        If released too quickly, cancels the recording.
+        """
         if not self._enabled:
             return
 
         current_state = self._state_machine.current_state
+
+        # Calculate hold duration
+        hold_duration = 0.0
+        if self._key_press_time:
+            hold_duration = time.time() - self._key_press_time
 
         if current_state == PTTState.RECORDING:
             # Stop recording
@@ -267,17 +285,41 @@ class PTTController:
                 "timestamp": time.time()
             })
 
-        elif current_state == PTTState.KEY_PRESSED:
-            # Released too quickly - cancel
-            self._state_machine.transition(
-                PTTState.IDLE,
-                trigger="quick_release",
-                data={"reason": "released_before_recording_started"}
-            )
-
-            self._logger.log_event("quick_release", {
-                "duration_ms": self._state_machine.time_in_current_state * 1000
+            self._logger.log_event("key_released", {
+                "hold_duration_seconds": hold_duration,
+                "state": "recording"
             })
+
+        elif current_state == PTTState.KEY_PRESSED:
+            # Check if minimum duration was met
+            if hold_duration < self._min_duration:
+                # Released too quickly - below minimum duration
+                self._state_machine.transition(
+                    PTTState.IDLE,
+                    trigger="quick_release",
+                    data={"reason": "below_minimum_duration"}
+                )
+
+                self._logger.log_event("quick_release", {
+                    "hold_duration_seconds": hold_duration,
+                    "min_duration_seconds": self._min_duration,
+                    "duration_ms": hold_duration * 1000
+                })
+            else:
+                # Released before recording actually started, but met minimum duration
+                # This is a rare edge case - log it
+                self._state_machine.transition(
+                    PTTState.IDLE,
+                    trigger="released_before_recording",
+                    data={"reason": "released_before_recording_started"}
+                )
+
+                self._logger.log_event("released_before_recording", {
+                    "hold_duration_seconds": hold_duration
+                })
+
+            # Clear press time
+            self._key_press_time = None
 
     def _cancel_recording(self) -> None:
         """Cancel ongoing recording."""
