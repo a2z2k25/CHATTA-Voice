@@ -24,6 +24,12 @@ __version__ = "0.1.0"
 # Import public components
 from .logging import PTTLogger, PTTEvent, get_ptt_logger, reset_ptt_logger
 from .keyboard import KeyboardHandler, check_keyboard_permissions
+from .state_machine import (
+    PTTState,
+    PTTStateMachine,
+    StateTransition,
+    create_ptt_state_machine
+)
 
 # Public API
 __all__ = [
@@ -36,4 +42,10 @@ __all__ = [
     # Keyboard
     "KeyboardHandler",
     "check_keyboard_permissions",
+
+    # State Machine
+    "PTTState",
+    "PTTStateMachine",
+    "StateTransition",
+    "create_ptt_state_machine",
 ]
