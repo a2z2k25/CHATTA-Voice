@@ -4,19 +4,21 @@
 This module implements keyboard-controlled voice recording for CHATTA, allowing users to control recording via configurable key combinations instead of automatic silence detection.
 
 ## Status
-🚧 **In Development** - Phase 2: Foundation Setup
+🚧 **In Development** - Phase 2: Foundation Setup (67% Complete)
 
 ## Module Structure
 ```
 ptt/
-├── __init__.py              # Module initialization and public API
+├── __init__.py              # Module initialization and public API ✅
+├── keyboard.py              # Keyboard event handling ✅
+├── logging.py               # PTT logging infrastructure ✅
 ├── controller.py            # Main PTT controller (Phase 3)
-├── keyboard.py              # Keyboard event handling (Phase 3)
 ├── permissions.py           # Permission management (Phase 3)
 ├── recorder.py              # PTT-specific recording (Phase 3)
-├── config.py                # PTT configuration (Phase 2)
-└── README.md                # This file
+└── README.md                # This file ✅
 ```
+
+**Configuration**: PTT settings in `src/voice_mode/config.py` ✅
 
 ## Features (Planned)
 
@@ -61,7 +63,7 @@ response = await converse(
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Phase 1: Research & Design | ✅ Complete | 100% |
-| Phase 2: Foundation Setup | 🚧 In Progress | 17% |
+| Phase 2: Foundation Setup | 🚧 In Progress | 67% (4/6) |
 | Phase 3: Core PTT | ⏳ Not Started | 0% |
 | Phase 4: Transport Adaptation | ⏳ Not Started | 0% |
 | Phase 5: Enhanced Features | ⏳ Not Started | 0% |
@@ -69,6 +71,14 @@ response = await converse(
 | Phase 7: Documentation | ⏳ Not Started | 0% |
 | Phase 8: Release Preparation | ⏳ Not Started | 0% |
 | Phase 9: Post-Release Support | ⏳ Not Started | 0% |
+
+### Phase 2 Completed Sprints
+- ✅ Sprint 2.1: Development Environment Setup
+- ✅ Sprint 2.2: Keyboard Library Integration (pynput)
+- ✅ Sprint 2.3: Configuration Extensions (19 config vars)
+- ✅ Sprint 2.4: Logging Infrastructure
+- ⏳ Sprint 2.5: Test Fixtures Setup
+- ⏳ Sprint 2.6: Documentation Structure
 
 ## Dependencies
 - `pynput`: Cross-platform keyboard monitoring

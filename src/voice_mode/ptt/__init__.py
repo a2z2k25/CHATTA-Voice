@@ -21,5 +21,19 @@ Usage:
 
 __version__ = "0.1.0"
 
-# Public API (will be populated as we implement components)
-__all__ = []
+# Import public components
+from .logging import PTTLogger, PTTEvent, get_ptt_logger, reset_ptt_logger
+from .keyboard import KeyboardHandler, check_keyboard_permissions
+
+# Public API
+__all__ = [
+    # Logging
+    "PTTLogger",
+    "PTTEvent",
+    "get_ptt_logger",
+    "reset_ptt_logger",
+
+    # Keyboard
+    "KeyboardHandler",
+    "check_keyboard_permissions",
+]

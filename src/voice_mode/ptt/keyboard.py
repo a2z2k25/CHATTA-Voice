@@ -10,6 +10,7 @@ import platform
 from typing import Set, Optional, Callable
 from pynput import keyboard
 from threading import Lock
+from .logging import get_ptt_logger
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +55,17 @@ class KeyboardHandler:
         self._lock = Lock()
         self._combo_active = False
         self._is_running = False
+        self._ptt_logger = get_ptt_logger()
 
         logger.info(f"KeyboardHandler initialized for {platform.system()}")
         logger.debug(f"Monitoring key combo: {self.key_combo}")
+
+        # Log initialization
+        self._ptt_logger.log_event("keyboard_handler_init", {
+            "platform": platform.system(),
+            "key_combo": list(self.key_combo),
+            "debounce_ms": debounce_ms
+        })
 
     def _parse_key_combo(self, combo_str: str) -> Set[str]:
         """
@@ -125,16 +134,27 @@ class KeyboardHandler:
         with self._lock:
             self.pressed_keys.add(key_name)
 
+            # Log key press if enabled
+            self._ptt_logger.log_key_event(key_name, "press")
+
             # Check if combo is now complete
             if not self._combo_active and self.key_combo.issubset(self.pressed_keys):
                 self._combo_active = True
                 logger.debug(f"PTT combo activated: {self.key_combo}")
 
+                # Log combo activation
+                self._ptt_logger.log_event("ptt_combo_activated", {
+                    "keys": list(self.pressed_keys)
+                })
+
                 if self.on_press_callback:
                     try:
+                        timer_id = self._ptt_logger.start_timer("on_press_callback")
                         self.on_press_callback()
+                        self._ptt_logger.stop_timer(timer_id)
                     except Exception as e:
                         logger.error(f"Error in on_press_callback: {e}")
+                        self._ptt_logger.log_error(e, {"event": "on_press_callback"})
 
     def _on_release(self, key):
         """
@@ -150,16 +170,27 @@ class KeyboardHandler:
         with self._lock:
             self.pressed_keys.discard(key_name)
 
+            # Log key release if enabled
+            self._ptt_logger.log_key_event(key_name, "release")
+
             # Check if combo is no longer active
             if self._combo_active and not self.key_combo.issubset(self.pressed_keys):
                 self._combo_active = False
                 logger.debug(f"PTT combo deactivated")
 
+                # Log combo deactivation
+                self._ptt_logger.log_event("ptt_combo_deactivated", {
+                    "remaining_keys": list(self.pressed_keys)
+                })
+
                 if self.on_release_callback:
                     try:
+                        timer_id = self._ptt_logger.start_timer("on_release_callback")
                         self.on_release_callback()
+                        self._ptt_logger.stop_timer(timer_id)
                     except Exception as e:
                         logger.error(f"Error in on_release_callback: {e}")
+                        self._ptt_logger.log_error(e, {"event": "on_release_callback"})
 
     def start(self) -> bool:
         """
