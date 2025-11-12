@@ -128,3 +128,4 @@ docker/data/
 
 # LiveKit configuration (contains API keys)
 deployments/docker/livekit/livekit.yaml
+voicemode.env
