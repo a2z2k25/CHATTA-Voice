@@ -13,14 +13,17 @@ Natural Voice Conversations for AI Assistants
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![BUMBA Platform](https://img.shields.io/badge/BUMBA-Platform-gold.svg)](https://bumba.ai)
 
 **Talk to Claude Code with your voice. Get instant responses. Control everything with keyboard shortcuts.**
 
 CHATTA adds natural voice conversation capabilities to Claude Code and other AI assistants through the Model Context Protocol (MCP). Speak your questions, hear the responses, and use Push-to-Talk for precise control.
 
+🏁 **Part of the BUMBA Platform** - Building Unified Multi-agent Business Applications
+
 ## Why CHATTA?
 
-### 🎯 Push-to-Talk Control
+### 🟡 Push-to-Talk Control
 Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
 - **Hold Mode**: Press and hold to talk, release to stop
 - **Toggle Mode**: Press once to start, press again to stop
@@ -28,12 +31,12 @@ Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
 
 Default: `Down Arrow + Right Arrow` (customizable)
 
-### ⚡ 60% Faster Response Times
+### 🟢 60% Faster Response Times
 Optimized audio pipeline delivers sub-2-second responses:
 - **Traditional flow**: 3.5s average (record → process → speak)
 - **CHATTA flow**: 1.4s average (parallel processing, WebRTC VAD, connection pooling)
 
-### 💰 Zero Cost Option
+### 🔴 Zero Cost Option
 Run everything locally with no API fees:
 - **Whisper.cpp** for speech-to-text (on-device)
 - **Kokoro TTS** for text-to-speech (50+ voices)
@@ -293,6 +296,28 @@ pytest tests/unit/ptt/ -v
 make build-package
 ```
 
+## 🏁 BUMBA Platform
+
+CHATTA is part of the **BUMBA Platform** - Building Unified Multi-agent Business Applications.
+
+### Platform Components
+
+- 🟡 **Strategy** - Product planning and feature prioritization
+- 🟢 **Backend** - Infrastructure and core services
+- 🔴 **Frontend** - User experience and interface design
+- 🟠 **Testing** - Quality assurance and validation
+- 🏁 **Completion** - Deployment and production readiness
+
+### Enterprise Features
+
+- **Professional Development**: Industry-standard workflows and patterns
+- **Multi-agent Coordination**: Intelligent task orchestration
+- **Designer-Optimized**: UI/UX focused tooling and integration
+- **Quality Enforcement**: Automated testing and code review
+- **Production-Ready**: Battle-tested deployment pipelines
+
+Learn more at [bumba.ai](https://bumba.ai)
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details
@@ -303,4 +328,10 @@ Built on [VoiceMode](https://github.com/mbailey/voicemode) by [@mbailey](https:/
 
 ---
 
-**CHATTA** - Talk naturally with AI. Control precisely with keyboard. Respond instantly with optimized latency.
+<div align="center">
+
+🏁 **CHATTA** - Talk naturally with AI. Control precisely with keyboard. Respond instantly with optimized latency.
+
+*Part of the BUMBA Platform - Enterprise-Ready Voice Integration*
+
+</div>
