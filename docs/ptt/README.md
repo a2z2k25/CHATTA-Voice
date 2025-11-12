@@ -1,7 +1,7 @@
 # Push-to-Talk (PTT) Module Documentation
 
-**Version:** 0.1.0
-**Status:** Phase 3 Complete (Core Implementation)
+**Version:** 0.2.0
+**Status:** Phase 4 Complete (Transport Integration)
 
 ## Overview
 
@@ -589,10 +589,14 @@ Current test coverage (Phase 3 complete):
 
 ## Future Enhancements
 
-Planned for Phase 4-9:
+### Completed Phases
 
-- **Phase 4:** Integration with CHATTA voice transport
-- **Phase 5:** Visual feedback, statistics, cancel key support
+- ✅ **Phase 1-3:** Core PTT implementation (state machine, keyboard handling, audio recording)
+- ✅ **Phase 4:** Integration with CHATTA voice transport (34/34 tests passing)
+
+### Planned Phases
+
+- **Phase 5:** Enhanced features (visual feedback, audio cues, statistics, UX improvements)
 - **Phase 6:** Comprehensive cross-platform testing
 - **Phase 7:** User documentation and examples
 - **Phase 8:** Production deployment preparation
@@ -627,5 +631,5 @@ Part of the CHATTA project. See main LICENSE file.
 ---
 
 **Last Updated:** 2025-11-09
-**Phase:** 3 Complete (Core Implementation)
-**Next Phase:** 4 (Transport Integration)
+**Phase:** 4 Complete (Transport Integration)
+**Next Phase:** 5 (Enhanced Features)

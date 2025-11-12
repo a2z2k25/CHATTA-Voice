@@ -122,3 +122,17 @@ Services can be installed and managed through MCP tools, with automatic service 
 - Use `pytest` for running tests, with fixtures for mocking external services
 - Integration tests verify service discovery and provider selection
 - The project includes comprehensive test coverage for configuration, providers, and tools
+
+## Voice Conversation Best Practices
+
+### Hybrid Voice-Text Response Pattern
+
+For lengthy responses (>500 chars, code blocks, 3+ paragraphs): output detailed text, then follow with concise voice message using `wait_for_response=True` to keep conversation active. Example: "I've provided details above. Review and let me know your thoughts." Prevents awkward silences, maintains flow. See [docs/ptt/HYBRID_VOICE_TEXT_PATTERN.md](docs/ptt/HYBRID_VOICE_TEXT_PATTERN.md).
+
+### Voice Conversation Identity: "Chatta"
+
+When using `mcp__chatta__converse`: respond naturally to "Chatta" as a conversational name. Context-specific (voice only). Don't introduce unprompted or use in text/code/other tools. Casual acknowledgment, no emphasis.
+
+**Note:** As of 2025-11-11, this identity instruction is embedded directly in the `converse` prompt (`src/voice_mode/prompts/converse.py`) and automatically loads with the tool. No manual CLAUDE.md reading required.
+
+See [docs/voice/CONVERSATIONAL_IDENTITY.md](docs/voice/CONVERSATIONAL_IDENTITY.md) for comprehensive guidelines.
