@@ -90,9 +90,9 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/a2z2k25/CHATTA-1.0"
-Repository = "https://github.com/a2z2k25/CHATTA-1.0"
-Issues = "https://github.com/a2z2k25/CHATTA-1.0/issues"
+Homepage = "https://github.com/a2z2k25/CHATTA-Voice"
+Repository = "https://github.com/a2z2k25/CHATTA-Voice"
+Issues = "https://github.com/a2z2k25/CHATTA-Voice/issues"
 
 [project.scripts]
 chatta = "voice_mode.cli:chatta_main"

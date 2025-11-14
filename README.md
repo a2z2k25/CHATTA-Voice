@@ -48,8 +48,8 @@ Run everything locally with no API fees:
 
 ```bash
 # Clone and install
-git clone https://github.com/a2z2k25/CHATTA-1.0
-cd CHATTA-1.0
+git clone https://github.com/a2z2k25/CHATTA-Voice
+cd CHATTA-Voice
 make dev-install
 
 # Or install from source
@@ -280,8 +280,8 @@ cd ~/.voicemode/services/kokoro && ./restart.sh
 
 ```bash
 # Setup
-git clone https://github.com/a2z2k25/CHATTA-1.0
-cd CHATTA-1.0
+git clone https://github.com/a2z2k25/CHATTA-Voice
+cd CHATTA-Voice
 make dev-install
 
 # Run tests
