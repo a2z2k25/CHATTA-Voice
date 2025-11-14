@@ -126,6 +126,34 @@ def load_chatta_env():
 # LiveKit API credentials
 # LIVEKIT_API_KEY=devkey
 # LIVEKIT_API_SECRET=secret
+
+#############
+# Push-to-Talk (PTT) Configuration
+#############
+
+# Enable PTT mode globally (true/false)
+# CHATTA_PTT_ENABLED=false
+
+# Default key combination (e.g., "down+right", "ctrl+space", "f13")
+# CHATTA_PTT_KEY_COMBO=down+right
+
+# PTT mode: hold (record while held), toggle (press to start/stop), hybrid
+# CHATTA_PTT_MODE=hold
+
+# Maximum recording duration in seconds
+# CHATTA_PTT_TIMEOUT=120.0
+
+# Play audio feedback sounds for PTT (true/false)
+# CHATTA_PTT_AUDIO_FEEDBACK=true
+
+# Show visual feedback in terminal (true/false)
+# CHATTA_PTT_VISUAL_FEEDBACK=true
+
+# Key to cancel recording (usually "escape")
+# CHATTA_PTT_CANCEL_KEY=escape
+
+# Check for accessibility permissions on macOS (true/false)
+# CHATTA_PTT_MACOS_ACCESSIBILITY_CHECK=true
 '''
         with open(config_path, 'w') as f:
             f.write(default_config)
@@ -339,6 +367,48 @@ STREAM_MAX_BUFFER = float(os.getenv("CHATTA_STREAM_MAX_BUFFER", "2.0"))  # Max b
 EVENT_LOG_ENABLED = SAVE_ALL or os.getenv("CHATTA_EVENT_LOG_ENABLED", "true").lower() in ("true", "1", "yes", "on")
 EVENT_LOG_DIR = os.getenv("CHATTA_EVENT_LOG_DIR", str(LOGS_DIR / "events"))
 EVENT_LOG_ROTATION = os.getenv("CHATTA_EVENT_LOG_ROTATION", "daily")  # Currently only daily is supported
+
+# ==================== PUSH-TO-TALK (PTT) CONFIGURATION ====================
+
+# Core PTT settings
+PTT_ENABLED = env_bool("CHATTA_PTT_ENABLED", False)
+PTT_KEY_COMBO = os.getenv("CHATTA_PTT_KEY_COMBO", "down+right")
+PTT_MODE = os.getenv("CHATTA_PTT_MODE", "hold")  # hold, toggle, or hybrid
+PTT_TIMEOUT = float(os.getenv("CHATTA_PTT_TIMEOUT", "120.0"))
+
+# Behavior settings
+PTT_AUTO_ENABLE = env_bool("CHATTA_PTT_AUTO_ENABLE", False)
+PTT_REQUIRE_BOTH_KEYS = env_bool("CHATTA_PTT_REQUIRE_BOTH_KEYS", True)
+PTT_RELEASE_DELAY = float(os.getenv("CHATTA_PTT_RELEASE_DELAY", "0.1"))
+PTT_MIN_DURATION = float(os.getenv("CHATTA_PTT_MIN_DURATION", "0.5"))
+
+# Audio feedback settings
+PTT_AUDIO_FEEDBACK = env_bool("CHATTA_PTT_AUDIO_FEEDBACK", True)
+PTT_FEEDBACK_VOLUME = float(os.getenv("CHATTA_PTT_FEEDBACK_VOLUME", "0.7"))
+PTT_VISUAL_FEEDBACK = env_bool("CHATTA_PTT_VISUAL_FEEDBACK", True)
+PTT_VISUAL_STYLE = os.getenv("CHATTA_PTT_VISUAL_STYLE", "compact")  # minimal, compact, detailed
+PTT_SHOW_DURATION = env_bool("CHATTA_PTT_SHOW_DURATION", True)
+
+# Advanced settings
+PTT_CANCEL_KEY = os.getenv("CHATTA_PTT_CANCEL_KEY", "escape")
+PTT_BUFFER_PRE_RECORDING = env_bool("CHATTA_PTT_BUFFER_PRE_RECORDING", False)
+PTT_BUFFER_DURATION = float(os.getenv("CHATTA_PTT_BUFFER_DURATION", "0.5"))
+PTT_KEY_REPEAT_IGNORE = env_bool("CHATTA_PTT_KEY_REPEAT_IGNORE", True)
+
+# Platform-specific settings
+PTT_MACOS_ACCESSIBILITY_CHECK = env_bool("CHATTA_PTT_MACOS_ACCESSIBILITY_CHECK", True)
+PTT_WINDOWS_HOOK_TYPE = os.getenv("CHATTA_PTT_WINDOWS_HOOK_TYPE", "low_level")
+PTT_LINUX_INPUT_METHOD = os.getenv("CHATTA_PTT_LINUX_INPUT_METHOD", "auto")
+
+# Statistics settings
+PTT_STATISTICS = env_bool("CHATTA_PTT_STATISTICS", True)
+PTT_STATS_AUTO_EXPORT = env_bool("CHATTA_PTT_STATS_AUTO_EXPORT", False)
+PTT_STATS_EXPORT_PATH = os.getenv("CHATTA_PTT_STATS_EXPORT_PATH", "")
+
+# Debug settings
+PTT_DEBUG = env_bool("CHATTA_PTT_DEBUG", False)
+PTT_LOG_KEYS = env_bool("CHATTA_PTT_LOG_KEYS", False)
+PTT_SIMULATE = env_bool("CHATTA_PTT_SIMULATE", False)
 
 # ==================== GLOBAL STATE ====================
 

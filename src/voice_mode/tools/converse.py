@@ -48,6 +48,7 @@ from voice_mode.config import (
     SAVE_TRANSCRIPTIONS,
     DISABLE_SILENCE_DETECTION,
     VAD_AGGRESSIVENESS,
+    PTT_ENABLED,
     SILENCE_THRESHOLD_MS,
     MIN_RECORDING_DURATION,
     SKIP_TTS,
@@ -76,6 +77,7 @@ from voice_mode.core import (
     play_chime_start,
     play_chime_end
 )
+from voice_mode.ptt import get_recording_function
 from voice_mode.tools.statistics import track_voice_interaction
 from voice_mode.utils import (
     get_event_logger,
@@ -101,6 +103,53 @@ openai_clients = get_openai_clients(OPENAI_API_KEY or "dummy-key-for-local", Non
 # Provider-specific clients are now created dynamically by the provider registry
 
 
+async def warmup_provider(
+    provider_type: str,
+    base_url: str,
+    service: str
+) -> bool:
+    """
+    Pre-warm a provider connection to reduce first-request latency.
+
+    Args:
+        provider_type: Provider identifier (e.g., 'kokoro', 'openai')
+        base_url: Provider base URL
+        service: Service type ('tts' or 'stt')
+
+    Returns:
+        True if warmup succeeded, False otherwise
+    """
+    try:
+        logger.debug(f"Pre-warming {service} connection to {provider_type} ({base_url})")
+
+        if service == 'tts':
+            # Minimal TTS request to establish connection
+            # Use get_tts_client_and_voice to trigger provider selection
+            client, voice, model, endpoint_info = await get_tts_client_and_voice(
+                base_url=base_url,
+                voice=None,  # Let it select default
+                model=None
+            )
+
+            # Connection is now established (pooled in httpx client)
+            logger.info(f"✓ Pre-warmed TTS connection to {provider_type}")
+            return True
+
+        elif service == 'stt':
+            # Minimal STT client initialization
+            client, model, endpoint_info = await get_stt_client(
+                base_url=base_url,
+                model=None
+            )
+
+            logger.info(f"✓ Pre-warmed STT connection to {provider_type}")
+            return True
+
+    except Exception as e:
+        logger.debug(f"Failed to pre-warm {service} {provider_type}: {e}")
+        return False
+
+
 async def startup_initialization():
     """Initialize services on startup based on configuration"""
     if voice_mode.config._startup_initialized:
@@ -112,7 +161,38 @@ async def startup_initialization():
     # Initialize provider registry
     logger.info("Initializing provider registry...")
     await provider_registry.initialize()
-    
+
+    # Pre-warm provider connections (Optimization #3: Connection Warmup)
+    warmup_enabled = os.getenv("CHATTA_WARMUP_PROVIDERS", "true").lower() in ("true", "1", "yes")
+
+    if warmup_enabled:
+        logger.info("Pre-warming provider connections...")
+        warmup_tasks = []
+
+        # Warm up TTS providers
+        for provider_type, base_url in [
+            ('kokoro', 'http://127.0.0.1:8880/v1'),
+            ('openai', 'https://api.openai.com/v1')
+        ]:
+            warmup_tasks.append(
+                warmup_provider(provider_type, base_url, 'tts')
+            )
+
+        # Warm up STT providers
+        from voice_mode.config import STT_BASE_URLS
+        for base_url in STT_BASE_URLS:
+            provider_type = 'whisper-local' if '127.0.0.1' in base_url else 'openai'
+            warmup_tasks.append(
+                warmup_provider(provider_type, base_url, 'stt')
+            )
+
+        # Run warmup tasks in parallel
+        warmup_results = await asyncio.gather(*warmup_tasks, return_exceptions=True)
+
+        # Log results
+        success_count = sum(1 for r in warmup_results if r is True)
+        logger.info(f"Pre-warmed {success_count}/{len(warmup_tasks)} provider connections")
+
     # Check if we should auto-start Kokoro
     auto_start_kokoro = os.getenv("VOICE_MODE_AUTO_START_KOKORO", "").lower() in ("true", "1", "yes", "on")
     if auto_start_kokoro:
@@ -254,11 +334,11 @@ async def text_to_speech_with_failover(
     Returns:
         Tuple of (success, tts_metrics, tts_config)
     """
-    from voice_mode.config import SIMPLE_FAILOVER
-    
+    from ..config import SIMPLE_FAILOVER
+
     # Use simple failover if enabled
     if SIMPLE_FAILOVER:
-        from voice_mode.simple_failover import simple_tts_failover
+        from ..simple_failover import simple_tts_failover
         return await simple_tts_failover(
             text=message,
             voice=voice or TTS_VOICES[0],
@@ -455,7 +535,7 @@ async def speech_to_text_with_failover(
             
             # Use the saved file for STT
             with open(wav_file_path, 'rb') as audio_file:
-                from voice_mode.simple_failover import simple_stt_failover
+                from ..simple_failover import simple_stt_failover
                 result = await simple_stt_failover(
                     audio_file=audio_file,
                     model="whisper-1"
@@ -468,7 +548,7 @@ async def speech_to_text_with_failover(
                 tmp_file.flush()
                 
                 with open(tmp_file.name, 'rb') as audio_file:
-                    from voice_mode.simple_failover import simple_stt_failover
+                    from ..simple_failover import simple_stt_failover
                     result = await simple_stt_failover(
                         audio_file=audio_file,
                         model="whisper-1"
@@ -1422,7 +1502,10 @@ async def converse(
     pip_trailing_silence: Optional[float] = None
 ) -> str:
     """Have a voice conversation - speak a message and optionally listen for response.
-    
+
+    🗣️ CONVERSATIONAL IDENTITY: Respond naturally to "Chatta" (context-specific voice name).
+    Don't introduce unprompted. See CLAUDE.md for guidelines.
+
     🌍 LANGUAGE SUPPORT - ALWAYS SELECT APPROPRIATE VOICE FOR NON-ENGLISH TEXT:
     When speaking non-English languages, you MUST specify the appropriate voice and provider:
     - Spanish: voice="ef_dora" (or "em_alex"), tts_provider="kokoro"
@@ -1918,16 +2001,24 @@ async def converse(
                     
                     # Brief pause before listening
                     await asyncio.sleep(0.5)
-                    
-                    # Play "listening" feedback sound
-                    await play_audio_feedback(
-                        "listening", 
-                        openai_clients, 
-                        audio_feedback, 
-                        audio_feedback_style or "whisper",
-                        pip_leading_silence=pip_leading_silence,
-                        pip_trailing_silence=pip_trailing_silence
-                    )
+
+                    # Determine if we should play converse audio feedback
+                    # Disable converse feedback when PTT is enabled, as PTT has its own feedback
+                    should_play_converse_feedback = audio_feedback if audio_feedback is not None else AUDIO_FEEDBACK_ENABLED
+                    if PTT_ENABLED:
+                        logger.debug("PTT mode is active - disabling converse audio feedback (PTT provides own feedback)")
+                        should_play_converse_feedback = False
+
+                    # Play "listening" feedback sound (only if not in PTT mode)
+                    if should_play_converse_feedback:
+                        await play_audio_feedback(
+                            "listening",
+                            openai_clients,
+                            should_play_converse_feedback,
+                            audio_feedback_style or "whisper",
+                            pip_leading_silence=pip_leading_silence,
+                            pip_trailing_silence=pip_trailing_silence
+                        )
                     
                     # Record response
                     logger.info(f"🎤 Listening for {listen_duration} seconds...")
@@ -1937,11 +2028,17 @@ async def converse(
                         event_logger.log_event(event_logger.RECORDING_START)
                     
                     record_start = time.perf_counter()
-                    logger.debug(f"About to call record_audio_with_silence_detection with duration={listen_duration}, disable_silence_detection={disable_silence_detection}, min_duration={min_listen_duration}, vad_aggressiveness={vad_aggressiveness}")
+
+                    # Get appropriate recording function based on PTT_ENABLED
+                    recording_function = get_recording_function(ptt_enabled=PTT_ENABLED)
+                    recording_method = "PTT" if PTT_ENABLED else "VAD"
+
+                    logger.debug(f"About to call recording function ({recording_method}) with duration={listen_duration}, disable_silence_detection={disable_silence_detection}, min_duration={min_listen_duration}, vad_aggressiveness={vad_aggressiveness}")
                     audio_data, speech_detected = await asyncio.get_event_loop().run_in_executor(
-                        None, record_audio_with_silence_detection, listen_duration, disable_silence_detection, min_listen_duration, vad_aggressiveness
+                        None, recording_function, listen_duration, disable_silence_detection, min_listen_duration, vad_aggressiveness
                     )
                     timings['record'] = time.perf_counter() - record_start
+                    logger.debug(f"Recording completed via {recording_method}: {len(audio_data)} samples, speech_detected={speech_detected}")
                     
                     # Log recording end
                     if event_logger:
@@ -1950,15 +2047,16 @@ async def converse(
                             "samples": len(audio_data)
                         })
                     
-                    # Play "finished" feedback sound
-                    await play_audio_feedback(
-                        "finished", 
-                        openai_clients, 
-                        audio_feedback, 
-                        audio_feedback_style or "whisper",
-                        pip_leading_silence=pip_leading_silence,
-                        pip_trailing_silence=pip_trailing_silence
-                    )
+                    # Play "finished" feedback sound (only if not in PTT mode)
+                    if should_play_converse_feedback:
+                        await play_audio_feedback(
+                            "finished",
+                            openai_clients,
+                            should_play_converse_feedback,
+                            audio_feedback_style or "whisper",
+                            pip_leading_silence=pip_leading_silence,
+                            pip_trailing_silence=pip_trailing_silence
+                        )
                     
                     # Mark the end of recording - this is when user expects response to start
                     user_done_time = time.perf_counter()

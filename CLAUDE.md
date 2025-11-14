@@ -1,124 +1,180 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Instructions for Claude Code when working with the CHATTA codebase.
 
 ## Project Overview
 
-VoiceMode is a Python package that provides voice interaction capabilities for AI assistants through the Model Context Protocol (MCP). It enables natural voice conversations with Claude Code and other AI coding assistants by integrating speech-to-text (STT) and text-to-speech (TTS) services.
+**CHATTA** is a Python MCP server providing voice conversation capabilities for AI assistants. It features Push-to-Talk (PTT) keyboard control, optimized latency (60% faster than traditional voice), and support for both cloud and local voice services.
 
-## Key Commands
+**Key Innovation:** PTT system with 3 modes (Hold/Toggle/Hybrid) + latency optimizations achieving sub-2-second response times.
 
-### Development & Testing
+## Quick Commands
+
 ```bash
-# Install in development mode with dependencies
-make dev-install
+# Development
+make dev-install          # Install with dependencies
+make test                 # Run all tests
+pytest tests/unit/ptt/ -v  # Run PTT tests specifically
 
-# Run all unit tests
-make test
-# Or directly: uv run pytest tests/ -v --tb=short
+# Building
+make build-package        # Build distributable package
+make clean                # Clean build artifacts
 
-# Run specific test
-uv run pytest tests/test_voice_mode.py -v
-
-# Clean build artifacts
-make clean
+# Package is `voice_mode`, server runs as: python -m voice_mode.server
 ```
 
-### Building & Publishing
-```bash
-# Build Python package
-make build-package
-
-# Build development version (auto-versioned)
-make build-dev  
-
-# Test package installation
-make test-package
-
-# Release workflow (bumps version, tags, pushes)
-make release
-```
-
-### Documentation
-```bash
-# Serve docs locally at http://localhost:8000
-make docs-serve
-
-# Build documentation site
-make docs-build
-
-# Check docs for errors (strict mode)
-make docs-check
-```
-
-## Architecture Overview
+## Architecture
 
 ### Core Components
 
-1. **MCP Server (`voice_mode/server.py`)**
-   - FastMCP-based server providing voice tools via stdio transport
-   - Auto-imports all tools, prompts, and resources
-   - Handles FFmpeg availability checks and logging setup
+**1. MCP Server** (`src/voice_mode/server.py`)
+- FastMCP-based stdio transport
+- Auto-imports tools, prompts, resources
 
-2. **Tool System (`voice_mode/tools/`)**
-   - **converse.py**: Primary voice conversation tool with TTS/STT integration
-   - **service.py**: Unified service management for Whisper/Kokoro/LiveKit
-   - **providers.py**: Provider discovery and registry management
-   - **devices.py**: Audio device detection and management
-   - Services subdirectory contains install/uninstall tools for Whisper, Kokoro, and LiveKit
+**2. PTT System** (`src/voice_mode/ptt/`)
+- **State Machine**: 7 states (IDLE → ARMED → RECORDING → PROCESSING → etc.)
+- **3 Modes**: Hold (walkie-talkie), Toggle (press-to-start/stop), Hybrid (best of both)
+- **Transport Adapter**: Abstracts LiveKit vs Local microphone
+- **Keyboard Monitor**: Cross-platform key combo detection (pynput)
 
-3. **Provider System (`voice_mode/providers.py`)**
-   - Dynamic discovery of OpenAI-compatible TTS/STT endpoints
-   - Health checking and failover support
-   - Maintains registry of available voice services
+**3. Tool System** (`src/voice_mode/tools/`)
+- **converse.py**: Main voice conversation tool with PTT integration
+- **service.py**: Manage Whisper/Kokoro/LiveKit services
+- **providers.py**: Auto-discover OpenAI-compatible voice endpoints
+- **devices.py**: Audio device management
 
-4. **Configuration (`voice_mode/config.py`)**
-   - Environment-based configuration with sensible defaults
-   - Support for voice preference files (project/user level)
-   - Audio format configuration (PCM, MP3, WAV, FLAC, AAC, Opus)
+**4. Provider System** (`src/voice_mode/providers.py`)
+- Dynamic discovery of TTS/STT endpoints
+- Health checking with automatic failover
+- Voice-first selection algorithm
 
-5. **Resources (`voice_mode/resources/`)**
-   - MCP resources exposed for client access
-   - Statistics, configuration, changelog, and version information
-   - Whisper model management
+**5. Configuration** (`src/voice_mode/config.py`)
+- Environment-based with `voicemode.env` support
+- PTT settings: `CHATTA_PTT_ENABLED`, `CHATTA_PTT_MODE`, `CHATTA_PTT_KEY_COMBO`
+- Voice preferences from `.voices.txt` files
 
-6. **Frontend (`voice_mode/frontend/`)**
-   - Next.js-based web interface for LiveKit integration
-   - Real-time voice conversation UI
-   - Built and bundled with the Python package
+### PTT State Machine
 
-### Service Architecture
+```
+IDLE → ARMED (key pressed) → RECORDING (audio detected) →
+PROCESSING (key released) → GENERATING (TTS) → PLAYING (audio out) → IDLE
 
-The project supports multiple voice service backends:
-- **OpenAI API**: Cloud-based TTS/STT (requires API key)
-- **Whisper.cpp**: Local speech-to-text service
-- **Kokoro**: Local text-to-speech with multiple voices
-- **LiveKit**: Room-based real-time communication
-
-Services can be installed and managed through MCP tools, with automatic service discovery and health checking.
+Special states:
+- CANCELLED: User interrupt (Escape key)
+- ERROR: Recoverable failures
+```
 
 ### Key Design Patterns
 
-1. **OpenAI API Compatibility**: All voice services expose OpenAI-compatible endpoints, enabling transparent switching between providers
-2. **Dynamic Tool Discovery**: Tools are auto-imported from the tools directory structure
-3. **Failover Support**: Automatic fallback between services based on availability
-4. **Transport Flexibility**: Supports both local microphone and LiveKit room-based communication
-5. **Audio Format Negotiation**: Automatic format validation against provider capabilities
+1. **Adapter Pattern**: `TransportAdapter` abstracts LiveKit/Local, enabling zero-breaking-change PTT integration
+2. **OpenAI Compatibility**: All services expose OpenAI-compatible endpoints
+3. **Failover**: Automatic provider switching on failure
+4. **Latency Optimization**: Parallel TTS/STT, WebRTC VAD, connection pooling, zero-copy audio
+
+### Latency Achievements
+
+- **Traditional**: 3.5s average (sequential record → STT → LLM → TTS → play)
+- **CHATTA**: 1.4s average (60% faster via parallel processing, VAD, pooling)
 
 ## Development Notes
 
-- The project uses `uv` for package management (not pip directly)
-- Python 3.10+ is required
-- FFmpeg is required for audio processing
-- The project follows a modular architecture with FastMCP patterns
-- Service installation tools handle platform-specific setup (launchd on macOS, systemd on Linux)
-- Event logging and conversation logging are available for debugging
-- WebRTC VAD is used for silence detection when available
+- **Package Manager**: `uv` (not pip)
+- **Python**: 3.10+
+- **Dependencies**: FFmpeg (required), pynput (PTT), webrtcvad (VAD)
+- **Testing**: pytest with fixtures for mocking services
+- **Architecture**: src/ layout, tests/ mirrors structure
 
-## Testing Approach
+## Voice Conversation Best Practices
 
-- Unit tests are in the `tests/` directory
-- Manual tests requiring user interaction are in `tests/manual/`
-- Use `pytest` for running tests, with fixtures for mocking external services
-- Integration tests verify service discovery and provider selection
-- The project includes comprehensive test coverage for configuration, providers, and tools
+### Hybrid Voice-Text Pattern
+
+For lengthy responses (>500 chars, code blocks, 3+ paragraphs):
+1. Output detailed text first
+2. Follow with concise voice summary using `wait_for_response=True`
+3. Example: "I've provided the details above. Review and let me know your thoughts."
+
+Prevents awkward silences, maintains conversation flow. See [docs/ptt/HYBRID_VOICE_TEXT_PATTERN.md](docs/ptt/HYBRID_VOICE_TEXT_PATTERN.md).
+
+### Voice Identity: "Chatta"
+
+When using `mcp__chatta__converse`: respond naturally to "Chatta" as conversational name. Context-specific (voice only). Don't introduce unprompted or use in text/code/tools. Casual acknowledgment, no emphasis.
+
+**Note:** Identity instruction embedded in `src/voice_mode/prompts/converse.py`, loads automatically.
+
+See [docs/voice/CONVERSATIONAL_IDENTITY.md](docs/voice/CONVERSATIONAL_IDENTITY.md) for details.
+
+## File Locations
+
+### Source Code
+- **Server**: `src/voice_mode/server.py`
+- **PTT Core**: `src/voice_mode/ptt/core.py` (state machine, recorder)
+- **PTT Adapter**: `src/voice_mode/ptt/transport_adapter.py`
+- **Config**: `src/voice_mode/config.py`
+- **Providers**: `src/voice_mode/providers.py`
+
+### Configuration
+- **Build**: `pyproject.toml` (root), `Makefile` (root)
+- **Environment**: `voicemode.env` (project root, gitignored if tracked)
+- **Voice Prefs**: `.voices.txt` (project or home directory)
+- **MCP Settings**: `~/.claude/mcp_settings.json` or `.claude/mcp_settings.json`
+
+### Documentation
+- **PTT Guide**: `docs/ptt/README.md`
+- **API Ref**: `docs/ptt/API_REFERENCE.md`
+- **Architecture**: `docs/ARCHITECTURE_DIAGRAMS.md`
+- **Case Study**: `docs/CASE_STUDY.md` (comprehensive development history)
+
+### Tests
+- **Unit**: `tests/unit/` (config, providers, tools)
+- **PTT Tests**: `tests/unit/ptt/` (state machine, adapter)
+- **Integration**: `tests/integration/` (end-to-end flows)
+- **Manual**: `tests/manual/` (user interaction required)
+
+## Common Tasks
+
+### Adding PTT Feature
+1. Update state machine in `src/voice_mode/ptt/core.py`
+2. Add tests in `tests/unit/ptt/`
+3. Update docs in `docs/ptt/`
+
+### Adding Voice Provider
+1. Ensure OpenAI-compatible endpoint
+2. Provider auto-discovered if health check passes
+3. Add to provider registry in `src/voice_mode/providers.py`
+
+### Debugging Voice Issues
+- Check: `voicemode.env` for PTT config
+- Run: `python -m voice_mode.tools.devices` for audio devices
+- Use: MCP tool `voice_status` for service health
+- Enable: Event logging with `VOICEMODE_EVENT_LOG_ENABLED=true`
+
+## Testing
+
+```bash
+# All tests
+pytest tests/ -v
+
+# PTT tests only
+pytest tests/unit/ptt/ -v
+
+# Integration tests
+pytest tests/integration/ -v
+
+# Specific test
+pytest tests/unit/ptt/test_state_machine.py::test_hold_mode -v
+```
+
+## Important Constraints
+
+- PTT requires foreground app (keyboard monitoring limitation)
+- WebRTC VAD requires audio input (won't work with file playback)
+- Service auto-discovery runs on startup (may take 2-3s)
+- Transport adapter pattern maintains backward compatibility
+
+## References
+
+- **MCP**: Model Context Protocol by Anthropic
+- **FastMCP**: Python MCP framework
+- **Whisper**: OpenAI speech-to-text model
+- **Kokoro**: Open-source TTS by remsky
+- **LiveKit**: Real-time communication platform

@@ -24,6 +24,8 @@ def main():
     warnings.filterwarnings("ignore", category=SyntaxWarning, module="pydub.utils")
     warnings.filterwarnings("ignore", message="'audioop' is deprecated", category=DeprecationWarning)
     warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
+    # Suppress RuntimeWarning about module execution order (intentional design)
+    warnings.filterwarnings("ignore", message=".*found in sys.modules.*", category=RuntimeWarning)
     
     # For MCP mode (stdio transport), we need to let the server start
     # so the LLM can see error messages in tool responses

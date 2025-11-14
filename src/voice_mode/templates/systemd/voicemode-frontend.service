@@ -1,6 +1,6 @@
 [Unit]
-Description=VoiceMode LiveKit Frontend
-Documentation=https://github.com/mbailey/voicemode
+Description=CHATTA LiveKit Frontend
+Documentation=https://github.com/a2z2k25/CHATTA-1.0
 After=network.target
 Wants=network.target
 

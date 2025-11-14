@@ -98,17 +98,17 @@ Issues = "https://github.com/a2z2k25/CHATTA-1.0/issues"
 chatta = "voice_mode.cli:chatta_main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["voice_mode"]
+packages = ["src/voice_mode"]
 include = [
-  "voice_mode/**/*.py",
-  "voice_mode/**/*.sh",
-  "voice_mode/**/*.plist",
-  "voice_mode/**/*.service",
-  "voice_mode/templates/**/*",
+  "src/voice_mode/**/*.py",
+  "src/voice_mode/**/*.sh",
+  "src/voice_mode/**/*.plist",
+  "src/voice_mode/**/*.service",
+  "src/voice_mode/templates/**/*",
 ]
 exclude = [
   "**/__pycache__",
-  "**/*.pyc", 
+  "**/*.pyc",
   "**/*.pyo",
   "**/*.pyd",
   "**/.DS_Store",
@@ -120,17 +120,13 @@ exclude = [
   "**/.git",
 ]
 
-[tool.hatch.build.hooks.custom]
-path = "build_hooks.py"
-
 [tool.hatch.build.targets.sdist]
 include = [
-  "/voice_mode",
+  "/src/voice_mode",
   "/README.md",
   "/LICENSE",
   "/pyproject.toml",
   "/CHANGELOG.md",
-  "/build_hooks.py",
 ]
 exclude = [
   "**/__pycache__",
@@ -142,7 +138,7 @@ exclude = [
 ]
 
 [tool.hatch.version]
-path = "voice_mode/__version__.py"
+path = "src/voice_mode/__version__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
