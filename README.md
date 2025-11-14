@@ -314,15 +314,13 @@ CHATTA is part of the **BUMBA Platform** - Building Unified Multi-agent Business
 - **Quality Enforcement**: Automated testing and code review
 - **Production-Ready**: Battle-tested deployment pipelines
 
-Learn more at [bumba.ai](https://bumba.ai)
-
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details
 
 ## Acknowledgments
 
-Initial foundation from VoiceMode project.
+Initial foundation from VoiceMode project by @mbailey.
 
 ---
 
