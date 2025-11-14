@@ -156,7 +156,7 @@ release:
 	echo "1. Create a GitHub release with changelog" && \
 	echo "2. Publish to PyPI" && \
 	echo "" && \
-	echo "Monitor progress at: https://github.com/mbailey/voice-mode/actions"
+	echo "Monitor progress at: https://github.com/a2z2k25/CHATTA-1.0/actions"
 
 # Build voice-mode package
 build-voice-mode:

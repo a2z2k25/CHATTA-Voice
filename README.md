@@ -50,8 +50,8 @@ Run everything locally with no API fees:
 
 ```bash
 # Clone and install
-git clone https://github.com/yourusername/chatta
-cd chatta
+git clone https://github.com/a2z2k25/CHATTA-1.0
+cd CHATTA-1.0
 make dev-install
 
 # Or install from source
@@ -282,8 +282,8 @@ cd ~/.voicemode/services/kokoro && ./restart.sh
 
 ```bash
 # Setup
-git clone https://github.com/yourusername/chatta
-cd chatta
+git clone https://github.com/a2z2k25/CHATTA-1.0
+cd CHATTA-1.0
 make dev-install
 
 # Run tests
@@ -322,9 +322,9 @@ Learn more at [bumba.ai](https://bumba.ai)
 
 MIT License - See [LICENSE](LICENSE) for details
 
-## Credits
+## Acknowledgments
 
-Built on [VoiceMode](https://github.com/mbailey/voicemode) by [@mbailey](https://github.com/mbailey)
+Initial foundation from VoiceMode project.
 
 ---
 
