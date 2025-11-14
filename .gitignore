@@ -74,6 +74,7 @@ test_output/
 # Voice MCP specific
 voice-mcp_recordings/
 debug_recordings/
+voice_mode  # Symlink used during development
 
 # Documentation build
 docs/_build/

@@ -334,11 +334,11 @@ async def text_to_speech_with_failover(
     Returns:
         Tuple of (success, tts_metrics, tts_config)
     """
-    from voice_mode.config import SIMPLE_FAILOVER
-    
+    from ..config import SIMPLE_FAILOVER
+
     # Use simple failover if enabled
     if SIMPLE_FAILOVER:
-        from voice_mode.simple_failover import simple_tts_failover
+        from ..simple_failover import simple_tts_failover
         return await simple_tts_failover(
             text=message,
             voice=voice or TTS_VOICES[0],
@@ -535,7 +535,7 @@ async def speech_to_text_with_failover(
             
             # Use the saved file for STT
             with open(wav_file_path, 'rb') as audio_file:
-                from voice_mode.simple_failover import simple_stt_failover
+                from ..simple_failover import simple_stt_failover
                 result = await simple_stt_failover(
                     audio_file=audio_file,
                     model="whisper-1"
@@ -548,7 +548,7 @@ async def speech_to_text_with_failover(
                 tmp_file.flush()
                 
                 with open(tmp_file.name, 'rb') as audio_file:
-                    from voice_mode.simple_failover import simple_stt_failover
+                    from ..simple_failover import simple_stt_failover
                     result = await simple_stt_failover(
                         audio_file=audio_file,
                         model="whisper-1"
