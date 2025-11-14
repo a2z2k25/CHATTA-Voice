@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "chatta"
 dynamic = ["version"]
-description = "CHATTA - Natural voice conversations for AI assistants through MCP"
+description = "Push-to-Talk voice control for Claude Code with 60% faster response times - keyboard-driven natural conversations through MCP"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}

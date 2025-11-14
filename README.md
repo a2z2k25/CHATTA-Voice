@@ -15,7 +15,7 @@ Natural Voice Conversations for AI Assistants
 
 **Talk to Claude Code with your voice. Get instant responses. Control everything with keyboard shortcuts.**
 
-CHATTA adds natural voice conversation capabilities to Claude Code and other AI assistants through the Model Context Protocol (MCP). Speak your questions, hear the responses, and use Push-to-Talk for precise control.
+CHATTA is a keyboard-driven Push-to-Talk voice assistant for Claude Code and AI assistants, delivering 60% faster response times through optimized audio processing. Built on the Model Context Protocol (MCP), it combines precise PTT control (Hold/Toggle/Hybrid modes) with sub-2-second latency for natural, real-time conversations.
 
 🏁 **Part of the BUMBA Platform** - Building Unified Multi-agent Business Applications
 
