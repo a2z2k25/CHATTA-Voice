@@ -99,35 +99,24 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 ### 🏁 First Conversation ###
 
-1. Start Claude Code
-2. Say: "Hey Claude, use the converse tool"
-3. Hold your PTT key (Right Option Key by default)
-4. Speak your question
-5. Release key
-6. Hear the response!
+1. Start: "Hey Claude, use the converse tool"
+2. Hello Message: Claude will say 'Hello..'
+3. Hold your PTT key: hold Right Option key
+4. Speak: add your prompt by voice
+5. Release key: release Right Option key
+6. Listen: hear Claude respond!
 
 <br>
 
 ### 🏁 Features ###
 
-### Voice Capabilities
-- **Multiple TTS Providers**: OpenAI (cloud), Kokoro (local, 50+ voices)
-- **Multiple STT Providers**: OpenAI Whisper (cloud), Whisper.cpp (local)
-- **LiveKit Integration**: Room-based real-time communication
-- **Audio Format Support**: PCM, MP3, WAV, FLAC, AAC, Opus
-
-### Smart Features
-- **Auto-Discovery**: Finds and connects to available voice services
+- **Multiple Providers**: OpenAI (cloud) or Kokoro/Whisper.cpp (local, 50+ voices)
+- **Auto-Discovery**: Finds and connects to available voice services automatically
 - **Failover**: Automatically switches providers if one fails
 - **Silence Detection**: WebRTC VAD for accurate speech detection
 - **Audio Feedback**: Optional chimes for PTT state changes
-- **Statistics Tracking**: Monitor performance and response times
-
-### Developer Features
-- **MCP Tools**: Seamless integration with Claude Code
-- **Service Management**: Install and manage voice services
-- **Docker Support**: Run services in containers
-- **Extensible**: Add custom voice providers
+- **MCP Integration**: Seamless tools for Claude Code
+- **Service Management**: Install and manage voice services via MCP tools
 
 <br>
 
