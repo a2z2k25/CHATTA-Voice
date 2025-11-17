@@ -48,8 +48,11 @@ git clone https://github.com/a2z2k25/CHATTA-Voice
 cd CHATTA-Voice
 make dev-install
 
-# Or install from source
-pip install -e .
+# Or install from source (requires uv)
+uv pip install -e .
+
+# Or install released package
+pip install chatta
 ```
 
 ### Configuration
@@ -159,26 +162,26 @@ Save on API costs by running services locally:
 
 ### Whisper.cpp (Speech-to-Text)
 ```bash
-# Using MCP tool in Claude Code:
+# Using MCP tool in Claude Code (recommended):
 "Install whisper with the base model"
 
-# Or manually:
-cd ~/.voicemode/services
-git clone https://github.com/ggerganov/whisper.cpp
-cd whisper.cpp && make
-./models/download-ggml-model.sh base
+# The MCP tool will:
+# - Auto-detect your platform (macOS with Metal, Linux with CUDA if available)
+# - Download and compile whisper.cpp with optimal settings
+# - Download the specified model (default: base, 142MB)
+# - Configure the service to auto-start
 ```
 
 ### Kokoro TTS (Text-to-Speech)
 ```bash
-# Using MCP tool in Claude Code:
+# Using MCP tool in Claude Code (recommended):
 "Install kokoro TTS service"
 
-# Or manually:
-cd ~/.voicemode/services
-git clone https://github.com/remsky/kokoro-fastapi
-cd kokoro-fastapi
-./start-gpu_mac.sh  # or appropriate script for your platform
+# The MCP tool will:
+# - Clone kokoro-fastapi repository
+# - Install dependencies in a virtual environment
+# - Download required models on first start
+# - Configure service to auto-start (macOS: launchd, Linux: systemd)
 ```
 
 ## Configuration Reference
@@ -228,17 +231,18 @@ bf_emma   # British Female - Emma
 python -m voice_mode.tools.devices
 
 # Test microphone
-# In Claude: "check my audio devices"
+# In Claude Code: "check my audio devices"
 ```
 
 ### Service Issues
 ```bash
 # Check service status
-# In Claude: "check voice service status"
+# In Claude Code: "check voice service status"
 
-# Restart services
-cd ~/.voicemode/services/whisper.cpp && ./restart.sh
-cd ~/.voicemode/services/kokoro && ./restart.sh
+# Or use MCP service management tools:
+# In Claude Code: "restart the whisper service"
+# In Claude Code: "restart the kokoro service"
+# In Claude Code: "show whisper service logs"
 ```
 
 ### PTT Not Working
