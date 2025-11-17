@@ -126,6 +126,8 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # Claude will respond in voice and listen for your reply
 ```
 
+<br>
+
 ### 🏁 Push-To-Talk Modes ###
 
 **Hold Mode** (default):
@@ -145,6 +147,8 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 - Or press-release-press to toggle for longer speech
 - Best for: Flexible conversation flow
 
+<br>
+
 ### Custom Key Combinations
 
 ```bash
@@ -154,6 +158,8 @@ CHATTA_PTT_KEY_COMBO=ctrl+space    # Control + Space
 CHATTA_PTT_KEY_COMBO=cmd+shift+v   # Command + Shift + V (Mac)
 CHATTA_PTT_KEY_COMBO=f12           # Single F12 key
 ```
+
+<br>
 
 ## Install Local Services (Optional)
 
@@ -171,6 +177,8 @@ Save on API costs by running services locally:
 # - Configure the service to auto-start
 ```
 
+<br>
+
 ### Kokoro TTS (Text-to-Speech)
 ```bash
 # Using MCP tool in Claude Code (recommended):
@@ -182,6 +190,8 @@ Save on API costs by running services locally:
 # - Download required models on first start
 # - Configure service to auto-start (macOS: launchd, Linux: systemd)
 ```
+
+<br>
 
 ## Configuration Reference
 
@@ -207,6 +217,8 @@ VOICEMODE_FEEDBACK_STYLE=whisper|shout
 VOICEMODE_VAD_AGGRESSIVENESS=0-3  # Voice activity detection sensitivity
 ```
 
+<br>
+
 ### Voice Preference File
 
 Create `.voices.txt` in your project or home directory:
@@ -222,6 +234,8 @@ am_adam   # American Male - Adam
 bf_emma   # British Female - Emma
 ```
 
+<br>
+
 ## Troubleshooting
 
 ### Audio Issues
@@ -232,6 +246,8 @@ python -m voice_mode.tools.devices
 # Test microphone
 # In Claude Code: "check my audio devices"
 ```
+
+<br>
 
 ### Service Issues
 ```bash
@@ -244,14 +260,16 @@ python -m voice_mode.tools.devices
 # In Claude Code: "show whisper service logs"
 ```
 
+<br>
+
 ### PTT Not Working
 - Check `voicemode.env` has correct settings
 - Verify key combination doesn't conflict with system shortcuts
 - Try a different key combo: `CHATTA_PTT_KEY_COMBO=f12`
 
-## Performance
+<br>
 
-### Typical Response Times
+### Performance
 
 | Metric | Traditional | CHATTA | Improvement |
 |--------|------------|--------|-------------|
@@ -261,6 +279,8 @@ python -m voice_mode.tools.devices
 
 *Based on average conversation over 100+ interactions*
 
+<br>
+
 ### Latency Optimizations
 - Parallel TTS/STT processing
 - WebRTC VAD for instant speech detection
@@ -268,12 +288,16 @@ python -m voice_mode.tools.devices
 - Zero-copy audio buffers
 - Provider health caching
 
+<br>
+
 ## Documentation
 
 - **[PTT Guide](docs/ptt/README.md)** - Complete Push-to-Talk documentation
 - **[API Reference](docs/ptt/API_REFERENCE.md)** - Tool and configuration reference
 - **[Architecture](docs/ARCHITECTURE_DIAGRAMS.md)** - System design diagrams
 - **[Case Study](docs/CASE_STUDY.md)** - Development journey and decisions
+
+<br>
 
 ## Development
 
@@ -293,9 +317,13 @@ pytest tests/unit/ptt/ -v
 make build-package
 ```
 
+<br>
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details
+
+<br>
 
 ## Acknowledgments
 
@@ -305,8 +333,5 @@ Initial foundation from VoiceMode project by @mbailey.
 
 <div align="center">
 
-🏁 **CHATTA** - Talk naturally with AI. Control precisely with keyboard. Respond instantly with optimized latency.
-
-*Part of the BUMBA Platform - Enterprise-Ready Voice Integration*
-
+### 🏁 BUMBA Multi-Agent Orchestration Framework 🏁 ###
 </div>
