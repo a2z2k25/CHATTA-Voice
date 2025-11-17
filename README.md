@@ -120,7 +120,11 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-## Install Local Models (optional) ##
+---
+
+<br>
+
+### Install Local Models (optional) ###
 
 ### 🏁 Whisper.cpp (Speech-to-text) ###
 ```bash
@@ -136,7 +140,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### 🏁 Kookoro (Text-to-speech) ###
+### 🏁 Kokoro (Text-to-speech) ###
 ```bash
 # Using MCP tool in Claude Code (recommended):
 "Install kokoro TTS service"
@@ -150,9 +154,15 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-## Configuration Reference ##
+---
 
-### Environment Variables
+<br>
+
+### Configuration Reference ###
+
+<br>
+
+### 🏁 Environment variables ###
 
 ```bash
 # PTT Settings
@@ -176,7 +186,7 @@ VOICEMODE_VAD_AGGRESSIVENESS=0-3  # Voice activity detection sensitivity
 
 <br>
 
-### Voice Preference File
+### 🏁 Voice Preferences File ###
 
 Create `.voices.txt` in your project or home directory:
 
@@ -193,9 +203,15 @@ bf_emma   # British Female - Emma
 
 <br>
 
+---
+
+<br>
+
 ## Troubleshooting
 
-### Audio Issues
+<br>
+
+### 🔴 Audio Issues ###
 ```bash
 # Check audio devices
 python -m voice_mode.tools.devices
@@ -206,7 +222,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### Service Issues
+### 🔴 Service Issues ###
 ```bash
 # Check service status
 # In Claude Code: "check voice service status"
@@ -219,10 +235,14 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### PTT Not Working
+### 🔴 PTT Not Working ###
 - Check `voicemode.env` has correct settings
 - Verify key combination doesn't conflict with system shortcuts
 - Try a different key combo: `CHATTA_PTT_KEY_COMBO=f12`
+
+<br>
+
+---
 
 <br>
 
@@ -238,7 +258,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### Latency Optimizations
+### 🏁 Latency Optimization ###
 - Parallel TTS/STT processing
 - WebRTC VAD for instant speech detection
 - HTTP connection pooling
@@ -256,26 +276,6 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### 🏁 Development ###
-
-```bash
-# Setup
-git clone https://github.com/a2z2k25/CHATTA-Voice
-cd CHATTA-Voice
-make dev-install
-
-# Run tests
-make test
-
-# Run specific test
-pytest tests/unit/ptt/ -v
-
-# Build package
-make build-package
-```
-
-<br>
-
 ### 🏁 License ###
 
 MIT License - See [LICENSE](LICENSE) for details
@@ -284,7 +284,7 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ### 🏁 Acknowledgement ###
 
-Built upon the foundation of the VoiceMode project by @mbailey
+Built upon the foundation of the Voice-Mode project by @mbailey
 
 <br>
 
