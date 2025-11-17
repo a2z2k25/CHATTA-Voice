@@ -59,7 +59,7 @@ The `KeyboardHandler` class provides cross-platform keyboard event monitoring:
 ```python
 from voice_mode.ptt import KeyboardHandler
 
-# Basic usage - default key combo (down+right)
+# Basic usage - default key combo (option_r)
 def on_combo_press():
     print("Recording started!")
 
@@ -67,7 +67,7 @@ def on_combo_release():
     print("Recording stopped!")
 
 handler = KeyboardHandler(
-    key_combo="down+right",
+    key_combo="option_r",
     on_press_callback=on_combo_press,
     on_release_callback=on_combo_release
 )
@@ -85,7 +85,7 @@ handler.stop()
 
 **Key Features:**
 - Cross-platform key monitoring (macOS, Windows, Linux)
-- Configurable key combinations (e.g., "space", "ctrl+c", "down+right")
+- Configurable key combinations (e.g., "option_r", "ctrl+c", "space")
 - Callback-based architecture
 - Thread-safe operation
 - Debouncing support (configurable delay)
@@ -99,8 +99,8 @@ handler = KeyboardHandler("space")
 # Two keys
 handler = KeyboardHandler("ctrl+c")
 
-# Arrow keys
-handler = KeyboardHandler("down+right")  # Default
+# Option keys
+handler = KeyboardHandler("option_r")  # Default (Right Option Key)
 
 # Function keys
 handler = KeyboardHandler("f12")
@@ -172,7 +172,7 @@ PTT configuration via environment variables:
 ```bash
 # Core settings
 export CHATTA_PTT_ENABLED=true
-export CHATTA_PTT_KEY_COMBO="down+right"
+export CHATTA_PTT_KEY_COMBO="option_r"
 export CHATTA_PTT_MODE="hold"          # hold, toggle, or hybrid
 export CHATTA_PTT_TIMEOUT=120.0
 
@@ -245,7 +245,7 @@ from voice_mode.tools.converse import converse
 response = await converse(
     "Hello",
     push_to_talk=True,
-    ptt_key_combo="down+right"
+    ptt_key_combo="option_r"
 )
 
 # Or use global configuration

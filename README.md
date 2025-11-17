@@ -23,7 +23,7 @@ Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
 - **Toggle Mode**: Press once to start, press again to stop
 - **Hybrid Mode**: Hold for quick questions, toggle for longer conversations
 
-Default: `Down Arrow + Right Arrow` (customizable)
+Default: `Right Option Key` (customizable)
 
 ### 🟢 60% Faster Response Times
 Optimized audio pipeline delivers sub-2-second responses:
@@ -78,7 +78,7 @@ Create `voicemode.env` in your project root:
 # Push-to-Talk Configuration
 CHATTA_PTT_ENABLED=true
 CHATTA_PTT_MODE=hold              # hold, toggle, or hybrid
-CHATTA_PTT_KEY_COMBO=down+right   # Your preferred key combo
+CHATTA_PTT_KEY_COMBO=option_r     # Your preferred key combo (Right Option Key)
 
 # Voice Services (optional - uses OpenAI by default)
 OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
@@ -92,9 +92,9 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 1. Start Claude Code
 2. Say: "Hey Claude, use the converse tool"
-3. Hold your PTT keys (Down+Right by default)
+3. Hold your PTT key (Right Option Key by default)
 4. Speak your question
-5. Release keys
+5. Release key
 6. Hear the response!
 
 ## Features
@@ -131,15 +131,15 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 ### Push-to-Talk Modes
 
 **Hold Mode** (default):
-- Press and hold `Down+Right`
+- Press and hold `Right Option Key`
 - Speak your question
 - Release when done
 - Best for: Quick questions, walkie-talkie style
 
 **Toggle Mode**:
-- Press `Down+Right` once to start recording
+- Press `Right Option Key` once to start recording
 - Speak as long as you want
-- Press `Down+Right` again to stop
+- Press `Right Option Key` again to stop
 - Best for: Long explanations, dictation
 
 **Hybrid Mode**:
@@ -151,6 +151,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 ```bash
 # In voicemode.env
+CHATTA_PTT_KEY_COMBO=option_r      # Right Option Key (default)
 CHATTA_PTT_KEY_COMBO=ctrl+space    # Control + Space
 CHATTA_PTT_KEY_COMBO=cmd+shift+v   # Command + Shift + V (Mac)
 CHATTA_PTT_KEY_COMBO=f12           # Single F12 key
@@ -192,7 +193,7 @@ Save on API costs by running services locally:
 # PTT Settings
 CHATTA_PTT_ENABLED=true|false
 CHATTA_PTT_MODE=hold|toggle|hybrid
-CHATTA_PTT_KEY_COMBO=down+right
+CHATTA_PTT_KEY_COMBO=option_r
 
 # Voice Preferences
 VOICEMODE_TTS_VOICE=alloy,nova,shimmer  # Preferred voices in order

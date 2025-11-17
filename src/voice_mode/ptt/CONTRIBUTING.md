@@ -66,7 +66,7 @@ def parse_key_combo(key_combo: str) -> Set[str]:
     """Parse key combination string into set of key names.
 
     Args:
-        key_combo: Key combination string (e.g., "ctrl+c", "down+right")
+        key_combo: Key combination string (e.g., "ctrl+c", "option_r")
 
     Returns:
         Set of normalized key names
@@ -101,7 +101,7 @@ from typing import Optional, Callable, Set, Dict, Any
 class KeyboardHandler:
     def __init__(
         self,
-        key_combo: str = "down+right",
+        key_combo: str = "option_r",
         on_press_callback: Optional[Callable[[], None]] = None,
         on_release_callback: Optional[Callable[[], None]] = None,
         debounce_ms: int = 50

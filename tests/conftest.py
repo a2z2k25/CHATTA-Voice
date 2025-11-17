@@ -40,7 +40,7 @@ def ptt_config():
     """Default PTT configuration for testing"""
     return {
         "enabled": False,
-        "key_combo": "down+right",
+        "key_combo": "option_r",
         "mode": "hold",
         "timeout": 120.0,
         "audio_feedback": True,

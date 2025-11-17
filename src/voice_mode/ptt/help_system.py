@@ -44,8 +44,8 @@ class PTTHelpSystem:
 Push-to-Talk (PTT) allows you to control voice recording with keyboard shortcuts.
 
 Basic Usage:
-1. PTT is controlled by a key combination (default: down+right arrow keys)
-2. Press/hold the keys to start recording
+1. PTT is controlled by a key combination (default: Right Option Key)
+2. Press/hold the key to start recording
 3. Release (or press again) to stop and transcribe
 
 Modes:
@@ -98,19 +98,19 @@ Set mode:
 PTT key combinations control when recording starts/stops.
 
 Common Combinations:
-- down+right    Arrow keys (recommended for macOS, no conflicts)
+- option_r      Right Option Key (default, recommended for macOS)
 - ctrl+space    Modifier + key
 - f12           Single function key
 - shift+tab     Modifier + special key
 
 Tips:
-- Use arrow keys on macOS to avoid accessibility permission issues
+- Right Option Key is recommended on macOS (no accessibility permission issues)
 - Avoid system shortcuts (cmd+tab, alt+tab, etc.)
 - Test your combination doesn't conflict with other apps
 - Modifiers alone (ctrl, shift) don't work well
 
 Set combination:
-  export CHATTA_PTT_KEY_COMBO=down+right
+  export CHATTA_PTT_KEY_COMBO=option_r
 """,
                 related_topics=['getting_started', 'macos_permissions'],
                 doc_url="https://github.com/yourusername/chatta/blob/main/docs/ptt/key-combinations.md"
@@ -124,7 +124,7 @@ PTT is configured via environment variables:
 Core Settings:
   CHATTA_PTT_ENABLED=true          # Enable PTT
   CHATTA_PTT_MODE=hold              # hold, toggle, hybrid
-  CHATTA_PTT_KEY_COMBO=down+right  # Key combination
+  CHATTA_PTT_KEY_COMBO=option_r    # Key combination
   CHATTA_PTT_TIMEOUT=120.0         # Max recording seconds
 
 Feedback Settings:
@@ -174,7 +174,7 @@ Common Issues:
 - Still not working: Log out and log back in
 
 Alternative:
-Use arrow keys (down+right) which may work without full permissions.
+Use Right Option Key (option_r) which works without accessibility permissions.
 """,
                 related_topics=['troubleshooting', 'key_combinations'],
                 doc_url="https://github.com/yourusername/chatta/blob/main/docs/ptt/macos-permissions.md"

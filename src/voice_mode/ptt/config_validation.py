@@ -127,7 +127,7 @@ class PTTConfigValidator:
                 level=ValidationLevel.ERROR,
                 setting='PTT_KEY_COMBO',
                 message='PTT key combination is not set',
-                suggestion='Set CHATTA_PTT_KEY_COMBO (e.g., "down+right", "ctrl+space")',
+                suggestion='Set CHATTA_PTT_KEY_COMBO (e.g., "option_r", "ctrl+space")',
                 current_value=None
             ))
             return

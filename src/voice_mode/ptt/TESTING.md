@@ -83,7 +83,7 @@ Provides default PTT configuration dictionary.
 ```python
 def test_config_structure(ptt_config):
     assert ptt_config["enabled"] is False
-    assert ptt_config["key_combo"] == "down+right"
+    assert ptt_config["key_combo"] == "option_r"
 ```
 
 #### `ptt_enabled_config`
@@ -404,7 +404,7 @@ def test_feature():
 @pytest.mark.parametrize("combo,expected", [
     ("space", {"space"}),
     ("ctrl+c", {"ctrl", "c"}),
-    ("down+right", {"down", "right"}),
+    ("option_r", {"option_r"}),
 ])
 def test_key_combo_parsing(combo, expected):
     handler = KeyboardHandler(combo)

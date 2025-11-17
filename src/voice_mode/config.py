@@ -134,8 +134,8 @@ def load_chatta_env():
 # Enable PTT mode globally (true/false)
 # CHATTA_PTT_ENABLED=false
 
-# Default key combination (e.g., "down+right", "ctrl+space", "f13")
-# CHATTA_PTT_KEY_COMBO=down+right
+# Default key combination (e.g., "option_r", "ctrl+space", "f13")
+# CHATTA_PTT_KEY_COMBO=option_r
 
 # PTT mode: hold (record while held), toggle (press to start/stop), hybrid
 # CHATTA_PTT_MODE=hold
@@ -372,7 +372,7 @@ EVENT_LOG_ROTATION = os.getenv("CHATTA_EVENT_LOG_ROTATION", "daily")  # Currentl
 
 # Core PTT settings
 PTT_ENABLED = env_bool("CHATTA_PTT_ENABLED", False)
-PTT_KEY_COMBO = os.getenv("CHATTA_PTT_KEY_COMBO", "down+right")
+PTT_KEY_COMBO = os.getenv("CHATTA_PTT_KEY_COMBO", "option_r")
 PTT_MODE = os.getenv("CHATTA_PTT_MODE", "hold")  # hold, toggle, or hybrid
 PTT_TIMEOUT = float(os.getenv("CHATTA_PTT_TIMEOUT", "120.0"))
 

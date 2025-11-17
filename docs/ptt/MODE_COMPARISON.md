@@ -226,7 +226,7 @@ config.PTT_MODE = "hybrid"
 config.PTT_MIN_DURATION = 0.5
 config.SILENCE_THRESHOLD_MS = 1500  # Tune based on speech patterns
 config.PTT_TIMEOUT = 60.0           # 1 min max
-config.PTT_KEY_COMBO = "down+right" # Unique chord
+config.PTT_KEY_COMBO = "option_r" # Right Option Key (default)
 ```
 
 **Silence Threshold Tuning:**
@@ -236,7 +236,7 @@ config.PTT_KEY_COMBO = "down+right" # Unique chord
 - Language learning: 3000-5000ms (3-5 seconds)
 
 **Key Combo Recommendations:**
-- `down+right` - Unique arrow chord
+- `option_r` - Right Option Key (default, macOS friendly)
 - `ctrl+r` - Memorable
 - `F11` - Dedicated key
 - Avoid: Single keys (may stop on pause)
@@ -336,7 +336,7 @@ config.PTT_KEY_COMBO = "F9"
 config.PTT_MODE = "hybrid"
 config.SILENCE_THRESHOLD_MS = 1500
 config.PTT_MIN_DURATION = 0.5
-config.PTT_KEY_COMBO = "down+right"
+config.PTT_KEY_COMBO = "option_r"
 ```
 
 ---
