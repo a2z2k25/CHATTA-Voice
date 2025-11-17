@@ -41,8 +41,8 @@ CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI 
 
 <br>
 
-### 🏁 Installation (requires Python 3.10+, FFmpeg) ###
-
+### 🏁 Installation ###
+(requires Python 3.10+, FFmpeg)
 ```bash
 # Clone and install
 git clone https://github.com/a2z2k25/CHATTA-Voice
@@ -54,11 +54,13 @@ uv pip install -e .
 
 # Or install released package (coming soon)
 pip install chatta
+
 ```
 
-### 🏁 Configuration ###
+<br>
 
-Add to your Claude Code MCP settings (`~/.claude/mcp_settings.json` or project `.claude/mcp_settings.json`):
+### 🏁 Configuration ###
+Add to Claude Code (`~/.claude/mcp_settings.json)
 
 ```json
 {
