@@ -269,7 +269,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### Performance
+### 🏁 Performance ###
 
 | Metric | Traditional | CHATTA | Improvement |
 |--------|------------|--------|-------------|
@@ -290,7 +290,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-## Documentation
+### 🏁 Documentation ###
 
 - **[PTT Guide](docs/ptt/README.md)** - Complete Push-to-Talk documentation
 - **[API Reference](docs/ptt/API_REFERENCE.md)** - Tool and configuration reference
@@ -299,7 +299,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-## Development
+### 🏁 Development ###
 
 ```bash
 # Setup
@@ -319,15 +319,17 @@ make build-package
 
 <br>
 
-## License
+### 🏁 License ###
 
 MIT License - See [LICENSE](LICENSE) for details
 
 <br>
 
-## Acknowledgments
+### 🏁 Acknowledgement ###
 
-Initial foundation from VoiceMode project by @mbailey.
+Built upon the foundation of the VoiceMode project by @mbailey
+
+<br>
 
 ---
 
