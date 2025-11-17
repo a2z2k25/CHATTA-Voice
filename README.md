@@ -284,7 +284,7 @@ MIT License - See [LICENSE](LICENSE) for details
 
 ### 🏁 Acknowledgement ###
 
-Built upon the foundation of the Voice-Mode project by @mbailey
+Built upon the foundation of the [VoiceMode project by @mbailey](https://github.com/mbailey/voicemode)
 
 <br>
 
