@@ -124,9 +124,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### Install Local Models (optional) ###
-
-### 🏁 Whisper.cpp (Speech-to-text) ###
+### 🏁 Install Whisper.cpp (Speech-to-text) ###
 ```bash
 # Using MCP tool in Claude Code (recommended):
 "Install whisper with the base model"
@@ -140,7 +138,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### 🏁 Kokoro (Text-to-speech) ###
+### 🏁 Install Kokoro (Text-to-speech) ###
 ```bash
 # Using MCP tool in Claude Code (recommended):
 "Install kokoro TTS service"
@@ -158,11 +156,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### Configuration Reference ###
-
-<br>
-
-### 🏁 Environment variables ###
+### 🏁 Setup Environment Variables ###
 
 ```bash
 # PTT Settings
@@ -186,7 +180,7 @@ VOICEMODE_VAD_AGGRESSIVENESS=0-3  # Voice activity detection sensitivity
 
 <br>
 
-### 🏁 Voice Preferences File ###
+### 🏁 Setup Voice Preferences ###
 
 Create `.voices.txt` in your project or home directory:
 
@@ -204,10 +198,6 @@ bf_emma   # British Female - Emma
 <br>
 
 ---
-
-<br>
-
-## Troubleshooting
 
 <br>
 
