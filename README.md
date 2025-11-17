@@ -95,29 +95,6 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### 🏁 First Conversation ###
-
-1. Start: "Hey Claude, use the converse tool"
-2. Hello Message: Claude will say 'Hello..'
-3. Hold your PTT key: hold Right Option key
-4. Speak: add your prompt by voice
-5. Release key: release Right Option key
-6. Listen: hear Claude respond!
-
-<br>
-
-### 🏁 Features ###
-
-- **Multiple Providers**: OpenAI (cloud) or Kokoro/Whisper.cpp (local, 50+ voices)
-- **Auto-Discovery**: Finds and connects to available voice services automatically
-- **Failover**: Automatically switches providers if one fails
-- **Silence Detection**: WebRTC VAD for accurate speech detection
-- **Audio Feedback**: Optional chimes for PTT state changes
-- **MCP Integration**: Seamless tools for Claude Code
-- **Service Management**: Install and manage voice services via MCP tools
-
-<br>
-
 ### 🏁 Basic Conversation ###
 ```python
 # In Claude Code, just say:
@@ -125,6 +102,17 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 # Claude will respond in voice and listen for your reply
 ```
+
+<br>
+
+### 🔴 First Conversation ###
+
+1. Start: "Hey Claude, use the converse tool"
+2. Hello Message: Claude will say 'Hello..'
+3. Hold your PTT key: hold Right Option key
+4. Speak: add your prompt by voice
+5. Release key: release Right Option key
+6. Listen: hear Claude respond!
 
 <br>
 
