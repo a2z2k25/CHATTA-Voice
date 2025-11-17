@@ -93,7 +93,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # VOICEMODE_STT_URL=http://localhost:7880/v1  # Local Whisper
 ```
 
-<br>
+---
 
 ### 🏁 Basic Conversation ###
 ```python
