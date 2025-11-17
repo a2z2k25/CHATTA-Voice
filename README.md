@@ -9,15 +9,15 @@
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 
-**Talk to Claude Code with your voice. Get instant responses. Control everything with keyboard shortcuts.**
+<br>
+
+## 🏁 Talk with Claude. Keyboard control. Optimized latency. ##
 
 CHATTA is a keyboard-driven Push-to-Talk voice assistant for Claude Code and AI assistants, delivering 60% faster response times through optimized audio processing. Built on the Model Context Protocol (MCP), it combines precise PTT control (Hold/Toggle/Hybrid modes) with sub-2-second latency for natural, real-time conversations.
 
-🏁 **Part of the BUMBA Platform** - Building Unified Multi-agent Business Applications
+---
 
-## Why CHATTA?
-
-### 🟡 Push-to-Talk Control
+### 🏁 Push-to-Talk Control ###
 Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
 - **Hold Mode**: Press and hold to talk, release to stop
 - **Toggle Mode**: Press once to start, press again to stop
@@ -25,12 +25,16 @@ Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
 
 Default: `Right Option Key` (customizable)
 
-### 🟢 60% Faster Response Times
+---
+
+### 🏁 60% Faster Response Times ###
 Optimized audio pipeline delivers sub-2-second responses:
 - **Traditional flow**: 3.5s average (record → process → speak)
 - **CHATTA flow**: 1.4s average (parallel processing, WebRTC VAD, connection pooling)
 
-### 🔴 Zero Cost Option
+---
+
+### 🏁 Zero Cost Option ###
 Run everything locally with no API fees:
 - **Whisper.cpp** for speech-to-text (on-device)
 - **Kokoro TTS** for text-to-speech (50+ voices)
