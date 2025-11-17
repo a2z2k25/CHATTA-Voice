@@ -42,7 +42,7 @@ Run everything locally with no API fees:
 
 ## Quick Start
 
-### Installation
+### 🏁 Installation ###
 
 **Requirements:** Python 3.10+, FFmpeg
 
@@ -59,7 +59,7 @@ uv pip install -e .
 pip install chatta
 ```
 
-### Configuration
+### 🏁 Configuration ###
 
 Add to your Claude Code MCP settings (`~/.claude/mcp_settings.json` or project `.claude/mcp_settings.json`):
 
@@ -74,7 +74,7 @@ Add to your Claude Code MCP settings (`~/.claude/mcp_settings.json` or project `
 }
 ```
 
-### Environment Setup
+### 🏁 Environment Setup ###
 
 Create `voicemode.env` in your project root:
 
@@ -92,7 +92,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # VOICEMODE_STT_URL=http://localhost:7880/v1  # Local Whisper
 ```
 
-### First Conversation
+### 🏁 First Conversation ###
 
 1. Start Claude Code
 2. Say: "Hey Claude, use the converse tool"
@@ -101,7 +101,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 5. Release key
 6. Hear the response!
 
-## Features
+### 🏁 Features ###
 
 ### Voice Capabilities
 - **Multiple TTS Providers**: OpenAI (cloud), Kokoro (local, 50+ voices)
@@ -132,7 +132,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # Claude will respond in voice and listen for your reply
 ```
 
-### Push-to-Talk Modes
+### 🏁 Push-To-Talk Modes ###
 
 **Hold Mode** (default):
 - Press and hold `Right Option Key`
