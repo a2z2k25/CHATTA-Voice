@@ -1,17 +1,13 @@
 ```
- ██████╗██╗  ██╗ █████╗ ████████╗████████╗ █████╗
-██╔════╝██║  ██║██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗
-██║     ███████║███████║   ██║      ██║   ███████║
-██║     ██╔══██║██╔══██║   ██║      ██║   ██╔══██║
-╚██████╗██║  ██║██║  ██║   ██║      ██║   ██║  ██║
- ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝
-
-Natural Voice Conversations for AI Assistants
+ ██████╗ ██╗  ██╗  █████╗  ████████╗ ████████╗  █████╗
+██╔════╝ ██║  ██║ ██╔══██╗ ╚══██╔══╝ ╚══██╔══╝ ██╔══██╗
+██║      ███████║ ███████║    ██║       ██║    ███████║
+██║      ██╔══██║ ██╔══██║    ██║       ██║    ██╔══██║
+╚██████╗ ██║  ██║ ██║  ██║    ██║       ██║    ██║  ██║
+ ╚═════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝    ╚═╝       ╚═╝    ╚═╝  ╚═╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![BUMBA Platform](https://img.shields.io/badge/BUMBA-Platform-gold.svg)](https://bumba.ai)
 
 **Talk to Claude Code with your voice. Get instant responses. Control everything with keyboard shortcuts.**
 
