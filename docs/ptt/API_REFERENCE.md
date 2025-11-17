@@ -44,9 +44,9 @@ PTTController(
 
 **Parameters:**
 - `key_combo` (str, optional): Key combination to trigger recording
-  - Default: `config.PTT_KEY_COMBO` (usually "down+right")
+  - Default: `config.PTT_KEY_COMBO` (usually "option_r" - Right Option Key)
   - Format: `"key"` or `"mod+key"` or `"key1+key2"`
-  - Examples: `"space"`, `"ctrl+r"`, `"down+right"`, `"F12"`
+  - Examples: `"space"`, `"ctrl+r"`, `"option_r"`, `"F12"`
 
 - `cancel_key` (str, optional): Key to cancel recording
   - Default: `config.PTT_CANCEL_KEY` (usually "escape")
@@ -876,20 +876,21 @@ if not check_keyboard_permissions():
 
 ### Environment Variables
 
-```python
+```bash
 # Mode
-PTT_MODE = "hold"  # "hold" | "toggle" | "hybrid"
+CHATTA_PTT_MODE="hold"  # "hold" | "toggle" | "hybrid"
 
 # Keys
-PTT_KEY_COMBO = "down+right"
-PTT_CANCEL_KEY = "escape"
+CHATTA_PTT_KEY_COMBO="option_r"  # Right Option Key (default)
+CHATTA_PTT_CANCEL_KEY="escape"
 
 # Timing
-PTT_TIMEOUT = 30.0          # Max duration (seconds)
-PTT_MIN_DURATION = 0.5      # Min duration (seconds)
+CHATTA_PTT_TIMEOUT=120.0          # Max duration (seconds)
+CHATTA_PTT_MIN_DURATION=0.5       # Min duration (seconds)
 
-# Audio
-SILENCE_THRESHOLD_MS = 1000 # Hybrid mode silence timeout
+# Audio Feedback
+CHATTA_PTT_AUDIO_FEEDBACK=true
+CHATTA_PTT_VISUAL_FEEDBACK=true
 ```
 
 ### Programmatic Configuration
@@ -898,7 +899,7 @@ SILENCE_THRESHOLD_MS = 1000 # Hybrid mode silence timeout
 from voice_mode import config
 
 # Set PTT mode
-config.PTT_MODE = "hybrid"
+config.PTT_MODE = "hybrid"  # hold, toggle, or hybrid
 
 # Set keys
 config.PTT_KEY_COMBO = "ctrl+space"
@@ -908,8 +909,9 @@ config.PTT_CANCEL_KEY = "escape"
 config.PTT_TIMEOUT = 60.0
 config.PTT_MIN_DURATION = 0.5
 
-# Set audio
-config.SILENCE_THRESHOLD_MS = 1500
+# Set audio feedback
+config.PTT_AUDIO_FEEDBACK = True
+config.PTT_VISUAL_FEEDBACK = True
 ```
 
 ---

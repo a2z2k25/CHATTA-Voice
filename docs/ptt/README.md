@@ -122,11 +122,11 @@ async def on_cancel():
     print("Recording cancelled")
 
 controller = PTTController(
-    key_combo="down+right",      # Arrow keys
+    key_combo="option_r",        # Right Option Key
     on_recording_start=on_start,
     on_recording_stop=on_stop,
     on_recording_cancel=on_cancel,
-    timeout=30.0                 # 30 second max
+    timeout=120.0                # 120 second max
 )
 
 controller.enable()
@@ -138,18 +138,19 @@ controller.enable()
 
 ```bash
 # Mode selection
-export PTT_MODE="hold"              # "hold", "toggle", or "hybrid"
+export CHATTA_PTT_MODE="hold"              # "hold", "toggle", or "hybrid"
 
 # Key combinations
-export PTT_KEY_COMBO="down+right"   # Default recording trigger
-export PTT_CANCEL_KEY="escape"      # Cancel recording
+export CHATTA_PTT_KEY_COMBO="option_r"     # Right Option Key (default)
+export CHATTA_PTT_CANCEL_KEY="escape"      # Cancel recording
 
 # Timing
-export PTT_TIMEOUT=30.0             # Max recording duration (seconds)
-export PTT_MIN_DURATION=0.5         # Min hold duration (seconds)
+export CHATTA_PTT_TIMEOUT=120.0            # Max recording duration (seconds)
+export CHATTA_PTT_MIN_DURATION=0.5         # Min hold duration (seconds)
 
-# Audio
-export SILENCE_THRESHOLD_MS=1000    # Hybrid mode silence timeout
+# Audio Feedback
+export CHATTA_PTT_AUDIO_FEEDBACK=true      # Enable audio cues
+export CHATTA_PTT_VISUAL_FEEDBACK=true     # Enable visual feedback
 ```
 
 ### Programmatic Configuration
@@ -367,12 +368,12 @@ config.PTT_MIN_DURATION = 0.5
 config.SILENCE_THRESHOLD_MS = 1500  # 1.5 seconds of silence
 
 controller = PTTController(
-    key_combo="down+right",
-    timeout=60.0
+    key_combo="option_r",
+    timeout=120.0
 )
 
 controller.enable()
-print("Hold down+right arrows to speak.")
+print("Hold Right Option Key to speak.")
 print("Release or stay silent for 1.5s to stop.")
 
 # Event-driven loop
@@ -433,7 +434,7 @@ controller = PTTController(key_combo="ctrl+r")
 # Multiple modifiers
 controller = PTTController(key_combo="ctrl+shift+r")
 
-# Multiple keys (chord)
+# Multiple keys (chord) - example only, not default
 controller = PTTController(key_combo="down+right")
 
 # Cancel key
