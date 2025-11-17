@@ -11,9 +11,7 @@
 
 <br>
 
-## 🏁 Talk with Claude. Keyboard control. Optimized latency. ##
-
-### CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI assistants, delivering 60% faster response times through optimized audio processing. Built on the Model Context Protocol (MCP), it combines precise PTT control with sub-2-second latency for natural, real-time conversations. ###
+### Talk with Claude. Keyboard control. Optimized latency. CHATTA-Voice is a keyboard-driven push-to-talk voice assistant for Claude Code and AI assistants, delivering 60% faster response times through optimized audio processing. Built on the Model Context Protocol (MCP), it combines precise PTT control with sub-2-second latency for natural, real-time conversations. ###
 
 ---
 
