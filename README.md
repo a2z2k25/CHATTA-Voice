@@ -39,6 +39,27 @@
 
 <br>
 
+### 🏁 Performance ###
+
+| Metric | Traditional | CHATTA | Improvement |
+|--------|------------|--------|-------------|
+| **Total Turnaround** | 3.5s | 1.4s | **60% faster** |
+| Time to First Audio | 2.1s | 0.8s | 62% faster |
+| Speech-to-Text | 1.2s | 0.4s | 67% faster |
+
+*Based on average conversation over 100+ interactions*
+
+<br>
+
+### 🏁 Latency Optimization ###
+- Parallel TTS/STT processing
+- WebRTC VAD for instant speech detection
+- HTTP connection pooling
+- Zero-copy audio buffers
+- Provider health caching
+
+<br>
+
 ### 🏁 Installation ###
 
 (requires Python 3.10+, FFmpeg)
@@ -233,27 +254,6 @@ python -m voice_mode.tools.devices
 <br>
 
 ---
-
-<br>
-
-### 🏁 Performance ###
-
-| Metric | Traditional | CHATTA | Improvement |
-|--------|------------|--------|-------------|
-| **Total Turnaround** | 3.5s | 1.4s | **60% faster** |
-| Time to First Audio | 2.1s | 0.8s | 62% faster |
-| Speech-to-Text | 1.2s | 0.4s | 67% faster |
-
-*Based on average conversation over 100+ interactions*
-
-<br>
-
-### 🏁 Latency Optimization ###
-- Parallel TTS/STT processing
-- WebRTC VAD for instant speech detection
-- HTTP connection pooling
-- Zero-copy audio buffers
-- Provider health caching
 
 <br>
 
