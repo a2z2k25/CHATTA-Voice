@@ -93,7 +93,11 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # VOICEMODE_STT_URL=http://localhost:7880/v1  # Local Whisper
 ```
 
+<br>
+
 ---
+
+<br>
 
 ### 🏁 Basic Conversation ###
 ```python
@@ -116,44 +120,9 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### 🏁 Push-To-Talk Modes ###
+## Install Local Models (optional) ##
 
-**Hold Mode** (default):
-- Press and hold `Right Option Key`
-- Speak your question
-- Release when done
-- Best for: Quick questions, walkie-talkie style
-
-**Toggle Mode**:
-- Press `Right Option Key` once to start recording
-- Speak as long as you want
-- Press `Right Option Key` again to stop
-- Best for: Long explanations, dictation
-
-**Hybrid Mode**:
-- Hold for quick questions (releases when you stop holding)
-- Or press-release-press to toggle for longer speech
-- Best for: Flexible conversation flow
-
-<br>
-
-### Custom Key Combinations
-
-```bash
-# In voicemode.env
-CHATTA_PTT_KEY_COMBO=option_r      # Right Option Key (default)
-CHATTA_PTT_KEY_COMBO=ctrl+space    # Control + Space
-CHATTA_PTT_KEY_COMBO=cmd+shift+v   # Command + Shift + V (Mac)
-CHATTA_PTT_KEY_COMBO=f12           # Single F12 key
-```
-
-<br>
-
-## Install Local Services (Optional)
-
-Save on API costs by running services locally:
-
-### Whisper.cpp (Speech-to-Text)
+### 🏁 Whisper.cpp (Speech-to-text) ###
 ```bash
 # Using MCP tool in Claude Code (recommended):
 "Install whisper with the base model"
@@ -167,7 +136,7 @@ Save on API costs by running services locally:
 
 <br>
 
-### Kokoro TTS (Text-to-Speech)
+### 🏁 Kookoro (Text-to-speech) ###
 ```bash
 # Using MCP tool in Claude Code (recommended):
 "Install kokoro TTS service"
@@ -181,7 +150,7 @@ Save on API costs by running services locally:
 
 <br>
 
-## Configuration Reference
+## Configuration Reference ##
 
 ### Environment Variables
 
