@@ -95,6 +95,8 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 # VOICEMODE_STT_URL=http://localhost:7880/v1  # Local Whisper
 ```
 
+<br>
+
 ### 🏁 First Conversation ###
 
 1. Start Claude Code
@@ -103,6 +105,8 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 4. Speak your question
 5. Release key
 6. Hear the response!
+
+<br>
 
 ### 🏁 Features ###
 
@@ -125,9 +129,9 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 - **Docker Support**: Run services in containers
 - **Extensible**: Add custom voice providers
 
-## Usage Examples
+<br>
 
-### Basic Conversation
+### 🏁 Basic Conversation ###
 ```python
 # In Claude Code, just say:
 "Use the converse tool to chat with me"
