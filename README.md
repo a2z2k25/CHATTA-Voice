@@ -130,7 +130,7 @@ OPENAI_API_KEY=your-key-here      # For cloud TTS/STT
 
 <br>
 
-### 🔴 First Conversation ###
+### 🟢 First Conversation ###
 
 1. Start: "Hey Claude, use the converse tool"
 2. Hello Message: Claude will say 'Hello..'
@@ -222,7 +222,7 @@ bf_emma   # British Female - Emma
 
 <br>
 
-### 🔴 Audio Issues ###
+### 🟡 Audio Issues ###
 ```bash
 # Check audio devices
 python -m voice_mode.tools.devices
@@ -233,7 +233,7 @@ python -m voice_mode.tools.devices
 
 <br>
 
-### 🔴 Service Issues ###
+### 🟠 Service Issues ###
 ```bash
 # Check service status
 # In Claude Code: "check voice service status"
