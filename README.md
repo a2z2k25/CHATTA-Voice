@@ -10,7 +10,6 @@
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 
 <br>
-
 ### 🏁 Talk with Claude. Keyboard control. Optimized latency. ###
 
 CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI assistants, delivering 60% faster response times through optimized audio processing. Built on the Model Context Protocol (MCP), it combines precise PTT control with sub-2-second latency for natural, real-time conversations.
@@ -18,12 +17,10 @@ CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI 
 ---
 
 ### 🏁 Push-to-Talk Control ###
-Press and hold a key combo to talk - just like a walkie-talkie. Three modes:
-- **Hold Mode**: Press and hold to talk, release to stop
-- **Toggle Mode**: Press once to start, press again to stop
-- **Hybrid Mode**: Hold for quick questions, toggle for longer conversations
 
-Default: `Right Option Key` (customizable)
+1. **Press and hold**: `Right Option Key` to talk just like a walkie-talkie:
+2. **Press and Hold**: Hold the PTT key (Right Option) while speaking.
+3. **Release**: Release the key when done - your speech is processed immediately.
 
 ---
 
