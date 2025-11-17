@@ -39,11 +39,9 @@ CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI 
 - **Kokoro TTS** for text-to-speech (50+ voices)
 - **No cloud required** or mix local + cloud services
 
----
+<br>
 
-### 🏁 Installation ###
-
-**Requirements:** Python 3.10+, FFmpeg
+### 🏁 Installation (requires Python 3.10+, FFmpeg) ###
 
 ```bash
 # Clone and install
@@ -54,7 +52,7 @@ make dev-install
 # Or install from source (requires uv)
 uv pip install -e .
 
-# Or install released package
+# Or install released package (coming soon)
 pip install chatta
 ```
 
