@@ -18,26 +18,27 @@ CHATTA is a keyboard-driven push-to-talk voice assistant for Claude Code and AI 
 
 ### 🏁 Push-to-Talk Control ###
 
-1. **Press and hold**: `Right Option Key` to talk just like a walkie-talkie:
+1. **Press key**: `Right Option Key` to talk just like a walkie-talkie:
 2. **Press and Hold**: Hold the PTT key (Right Option) while speaking.
-3. **Release**: Release the key when done - your speech is processed immediately.
+3. **Release key**: Release the key when done - your speech is processed immediately.
 
 ---
 
-### 🏁 60% Faster Response Times ###
-Optimized audio pipeline delivers sub-2-second responses:
-- **Traditional flow**: 3.5s average (record → process → speak)
-- **CHATTA flow**: 1.4s average (parallel processing, WebRTC VAD, connection pooling)
+### 🏁 60% Faster Response Times (sub 2sec) ###
+
+- **Traditional flows**: 3.5s average (record → process → speak)
+- **CHATTA-Voice flow**: 1.4s average (parallel processing, WebRTC VAD, connection pooling)
 
 ---
 
 ### 🏁 Zero Cost Option ###
-Run everything locally with no API fees:
+
+- **Local & free** run locally without API fees.
 - **Whisper.cpp** for speech-to-text (on-device)
 - **Kokoro TTS** for text-to-speech (50+ voices)
-- **No cloud required** - or mix local + cloud services
+- **No cloud required** or mix local + cloud services
 
-## Quick Start
+---
 
 ### 🏁 Installation ###
 
